@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Solo Leveling — Offline Random Card Team Builder & Battle Arena</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-shadow">
+
+  <!-- Canvases -->
+  <canvas id="confetti-canvas"></canvas>
+  <canvas id="particleCanvas"></canvas>
+
+  <!-- Header -->
+  <header>
+    <div class="top-bar">
+      <div class="system-badge">👑 [ SYSTEM DRAFT INTERFACE v2.0 ]</div>
+      <div class="header-actions">
+        <button id="open-battle-btn" class="btn-header btn-battle-glow" title="Simulate Squad vs Squad Battles">
+          ⚔️ Battle Arena
+        </button>
+        <button id="open-archive-btn" class="btn-header" title="Inspect Drawn & Discarded Cards Archive">
+          📜 Vault (<span id="btn-vault-count">0</span>)
+        </button>
+        <button id="open-roster-btn" class="btn-header" title="Edit, Add, or Customize Characters">
+          ✏️ Edit Roster (<span id="btn-total-count">34</span>)
+        </button>
+        <button id="open-setup-btn" class="btn-header" title="Player & Guild Settings">
+          ⚙️ Game Setup (<span id="btn-player-count">2P</span>)
+        </button>
+        <button id="bgm-btn" class="icon-btn" title="Toggle Ambient Mana Drone (BGM)" aria-label="Toggle BGM">
+          🎵
+        </button>
+        <button id="sound-btn" class="icon-btn" title="Toggle Sound FX (Mute/Unmute)" aria-label="Toggle Sound">
+          🔊
+        </button>
+      </div>
+    </div>
+
+    <h1>SOLO LEVELING <span class="highlight">RANDOM CARD DRAFT</span></h1>
+    
+    <div class="rule-pill">
+      ⚡ 7 Squad Positions • 🛡️ Strict No Duplicates • 🏆 Guild Battle Arena
+    </div>
+
+    <!-- Background Atmospheric Theme Switcher -->
+    <div class="theme-selector">
+      <button class="theme-tab active" data-theme="shadow" type="button">🌑 Shadow Monarch</button>
+      <button class="theme-tab" data-theme="ruler" type="button">👑 Ruler's Light</button>
+      <button class="theme-tab" data-theme="redgate" type="button">⚔️ Red Gate / Demon Castle</button>
+      <button class="theme-tab" data-theme="frost" type="button">❄️ Frost Gate</button>
+    </div>
+  </header>
+
+  <!-- Main Summon & Draft Controls HUD -->
+  <main class="draft-hud">
+    <div class="turn-banner">
+      <div class="turn-indicator">
+        <span class="turn-pulse-dot" id="turn-pulse-dot"></span>
+        <span>🎯 ACTIVE SUMMONER: <strong id="current-turn-name" style="color: #00d2ff;">Ahjin Guild (P1)</strong></span>
+      </div>
+
+      <div class="hud-actions">
+        <button id="summon-card-btn" class="summon-card-btn" title="Draw random character card (Hotkey: . or Space)">
+          ⚡ SUMMON HUNTER CARD 🃏
+        </button>
+        <button id="quick-random-btn" class="icon-btn" title="Quick Summon" aria-label="Quick Summon">
+          ⚡
+        </button>
+        <button id="reset-game-btn" class="icon-btn" title="Reset / Fresh Match" aria-label="Reset Match">
+          🔄
+        </button>
+      </div>
+    </div>
+
+    <div class="gate-status-tag">
+      <span>Dimensional Gate Pool: <strong id="remaining-count">34</strong> / <span id="total-pool-count">34</span> hunters remaining</span>
+      <span>•</span>
+      <span style="color: #ffd166;">Tip: Click any two squad slots to swap hunter positions!</span>
+    </div>
+  </main>
+
+  <!-- 1-8 Player Squad Scoreboard Dock -->
+  <section class="players-dock" id="players-dock" aria-label="Player Squad Scorecards">
+    <!-- Populated dynamically via app.js -->
+  </section>
+
+  <!-- 3D HOLOGRAM CHARACTER REVEAL & DRAFT MODAL -->
+  <dialog id="character-modal">
+    <div class="modal-card hunter-reveal-card">
+      <button class="close-modal-btn" aria-label="Close Modal">&times;</button>
+
+      <div class="hologram-card-inner">
+        <div id="reveal-rank" class="reveal-rank-banner tier-sss">SSS — GOD TIER</div>
+
+        <div class="reveal-avatar-frame">
+          <span id="reveal-avatar-symbol">👑</span>
+        </div>
+
+        <h2 class="reveal-char-name" id="reveal-name">Sung Jinwoo</h2>
+        <div class="reveal-char-title" id="reveal-title">The Shadow Monarch</div>
+
+        <div class="reveal-power-box">
+          <span id="reveal-power-num" class="reveal-power-num">⚡ 10,000,000 PWR</span>
+        </div>
+
+        <!-- 6 Animated Combat Metrics -->
+        <div class="reveal-stats-grid">
+          <div class="stat-metric-card">
+            <div class="stat-metric-header">
+              <span>⚔️ Raw Power</span>
+              <strong id="stat-raw-power">10.0</strong>
+            </div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill" id="bar-raw-power" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-metric-header">
+              <span>✨ Hax / Magic</span>
+              <strong id="stat-hax">10.0</strong>
+            </div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill" id="bar-hax" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-metric-header">
+              <span>⚡ Speed</span>
+              <strong id="stat-speed">10.0</strong>
+            </div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill" id="bar-speed" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-metric-header">
+              <span>🛡️ Durability</span>
+              <strong id="stat-durability">10.0</strong>
+            </div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill" id="bar-durability" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-metric-header">
+              <span>🤝 Synergy</span>
+              <strong id="stat-synergy">10.0</strong>
+            </div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill" id="bar-synergy" style="width: 100%;"></div>
+            </div>
+          </div>
+          <div class="stat-metric-card">
+            <div class="stat-metric-header">
+              <span>🧠 Battle IQ</span>
+              <strong id="stat-battle-iq">10.0</strong>
+            </div>
+            <div class="stat-bar-track">
+              <div class="stat-bar-fill" id="bar-battle-iq" style="width: 100%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="reveal-desc-box" id="reveal-desc">Description</div>
+        <div class="reveal-feats-box" id="reveal-feats">🏆 Feats: Major canon feats</div>
+        <div class="reveal-quote-box" id="reveal-quote">"Arise."</div>
+
+        <!-- Assign to 7 Positions -->
+        <div class="reveal-assign-heading">👉 ASSIGN TO SQUAD POSITION FOR ACTIVE PLAYER:</div>
+        <div class="reveal-role-buttons" id="reveal-role-buttons">
+          <!-- Generated dynamically with recommended role highlights -->
+        </div>
+
+        <button type="button" id="btn-discard-card" class="btn-discard-card">
+          🗑️ Discard / Disperse to Void (Cannot Be Drawn Again)
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIMENSIONAL ARCHIVE / VAULT MODAL -->
+  <dialog id="archive-modal">
+    <div class="modal-card archive-modal-content">
+      <div class="roster-header-row">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--gold);">
+          📜 Dimensional Archive & Graveyard (<span id="archive-count-display">0</span>)
+        </h2>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 0.8rem;">
+        Complete log of all characters drawn, drafted into squads, or discarded to the void in this match.
+      </p>
+      <div class="archive-grid" id="archive-grid">
+        <!-- Rendered dynamically via app.js -->
+      </div>
+    </div>
+  </dialog>
+
+  <!-- CHARACTER MANAGER & ROSTER EDITOR MODAL -->
+  <dialog id="roster-modal">
+    <div class="modal-card roster-modal-content">
+      <div class="roster-header-row">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--neon-blue);">
+          ✏️ Hunter Roster Manager (<span id="editor-total-count">34</span>)
+        </h2>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+
+      <!-- Search & Filter Toolbar -->
+      <div class="roster-toolbar">
+        <input type="text" id="roster-search-input" class="roster-search-input" placeholder="🔍 Search hunter by name, title, or abilities...">
+        <select id="roster-universe-filter" class="roster-filter-select">
+          <option value="all">⚡ All Tiers (34+)</option>
+          <option value="SSS">🌌 SSS — God Tier</option>
+          <option value="SS">👑 SS — Monarchs & Rulers</option>
+          <option value="S">⭐ S — National Level</option>
+          <option value="A+">⚔️ A+ — Top S-Rank</option>
+          <option value="A">🛡️ A — High Shadows & Hunters</option>
+        </select>
+        <button class="btn-sm btn-add" id="toggle-add-form-btn" type="button">➕ Add Hunter</button>
+        <button class="btn-sm btn-edit" id="export-roster-btn" type="button">📥 Export JSON</button>
+        <button class="btn-sm btn-del" id="reset-default-roster-btn" type="button">🔄 Reset Defaults</button>
+      </div>
+
+      <!-- Add / Edit Character Form -->
+      <div id="character-edit-form" class="edit-form-card" style="display: none;">
+        <input type="hidden" id="edit-char-id">
+        <div class="edit-input-group">
+          <label>Hunter Name:</label>
+          <input type="text" id="form-char-name" placeholder="e.g. Sung Jinwoo" required>
+        </div>
+        <div class="edit-input-group">
+          <label>Title / Epithet:</label>
+          <input type="text" id="form-char-title" placeholder="e.g. Shadow Monarch">
+        </div>
+        <div class="edit-input-group">
+          <label>Tier Category:</label>
+          <select id="form-char-tier">
+            <option value="SSS">SSS — God Tier</option>
+            <option value="SS">SS — Monarch / Ruler</option>
+            <option value="S">S — National Level</option>
+            <option value="A+">A+ — Top S-Rank</option>
+            <option value="A" selected>A — High Shadow / Hunter</option>
+          </select>
+        </div>
+        <div class="edit-input-group">
+          <label>Power Number (Combat Value):</label>
+          <input type="number" id="form-char-power" placeholder="e.g. 1000000">
+        </div>
+        <div class="edit-input-group" style="grid-column: 1 / -1;">
+          <label>Signature Abilities (comma separated):</label>
+          <input type="text" id="form-char-abilities" placeholder="e.g. Shadow Extraction, Ruler's Authority">
+        </div>
+        <div class="edit-input-group" style="grid-column: 1 / -1;">
+          <label>Important Feats:</label>
+          <input type="text" id="form-char-feats" placeholder="e.g. Defeated the Monarch of Destruction">
+        </div>
+        <div class="edit-input-group" style="grid-column: 1 / -1;">
+          <label>Lore Quote:</label>
+          <input type="text" id="form-char-quote" placeholder="e.g. Arise.">
+        </div>
+        <div class="edit-input-group" style="grid-column: 1 / -1; display: flex; gap: 0.6rem; justify-content: flex-end; flex-direction: row;">
+          <button class="btn-sm btn-del" id="cancel-edit-btn" type="button">Cancel</button>
+          <button class="btn-sm btn-add" id="save-char-form-btn" type="button">💾 Save Hunter Card</button>
+        </div>
+      </div>
+
+      <!-- Scrollable Table -->
+      <div class="roster-table-container">
+        <table class="roster-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Icon</th>
+              <th>Name</th>
+              <th>Tier</th>
+              <th>Power</th>
+              <th>Eligible Roles</th>
+              <th>Abilities</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="roster-table-body">
+            <!-- Populated dynamically via app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- GAME SETUP MODAL -->
+  <dialog id="setup-modal">
+    <div class="modal-card setup-modal-content">
+      <div class="roster-header-row">
+        <h2 style="font-family: var(--font-serif); font-size: 1.35rem; color: var(--neon-blue);">
+          ⚙️ Game Setup (<span id="setup-player-count-display">2</span> Players)
+        </h2>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+
+      <div class="setup-group">
+        <label class="setup-label">Player Count Presets:</label>
+        <div class="player-count-btns">
+          <button class="p-count-btn" data-count="1" type="button">1P (Solo)</button>
+          <button class="p-count-btn active" data-count="2" type="button">2P (1v1)</button>
+          <button class="p-count-btn" data-count="3" type="button">3P</button>
+          <button class="p-count-btn" data-count="4" type="button">4P (Raid)</button>
+          <button class="p-count-btn" data-count="5" type="button">5P</button>
+          <button class="p-count-btn" data-count="6" type="button">6P</button>
+          <button class="p-count-btn" data-count="8" type="button">8P</button>
+        </div>
+      </div>
+
+      <div class="setup-group">
+        <label class="setup-label">Customize Player / Guild Names:</label>
+        <div class="player-names-inputs" id="player-names-inputs">
+          <!-- Dynamically populated via app.js -->
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 0.8rem; justify-content: flex-end; margin-top: 1.2rem;">
+        <button class="btn-secondary" id="reset-new-game-btn" type="button">🔄 Fresh Reset</button>
+        <button class="btn-primary" id="start-game-btn" type="button">Apply & Play 🚀</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- BATTLE ARENA MODAL -->
+  <dialog id="battle-modal">
+    <div class="modal-card battle-modal-content">
+      <div class="roster-header-row">
+        <h2 style="font-family: var(--font-serif); font-size: 1.4rem; color: var(--crimson);">
+          ⚔️ GUILD SQUAD BATTLE ARENA 🔥
+        </h2>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+
+      <!-- Select Matchup -->
+      <div class="battle-setup-row">
+        <div class="battle-fighter-select">
+          <label class="setup-label">🔴 Challenger 1:</label>
+          <select id="battle-p1-select" class="battle-select"></select>
+        </div>
+        <div class="battle-vs-badge">VS</div>
+        <div class="battle-fighter-select">
+          <label class="setup-label">🔵 Challenger 2:</label>
+          <select id="battle-p2-select" class="battle-select"></select>
+        </div>
+      </div>
+
+      <!-- Battle Matchup Display -->
+      <div class="battle-stage" id="battle-stage">
+        <!-- Side 1 -->
+        <div class="battle-side-card">
+          <div class="battle-side-header">
+            <span class="battle-side-name" id="battle-name-p1" style="font-weight: 800;">Player 1</span>
+            <span class="battle-side-power" id="battle-power-p1" style="color: var(--gold); font-weight: 800;">⚡ 0 PWR</span>
+          </div>
+          <div class="battle-hp-bar-wrapper">
+            <div class="battle-hp-fill" id="battle-hp-p1" style="width: 100%;"></div>
+          </div>
+        </div>
+
+        <!-- Center VS Animation -->
+        <div class="battle-center-fx">
+          <div class="battle-clash-icon" id="battle-clash-icon">⚔️</div>
+          <div class="battle-round-badge" id="battle-round-badge">READY TO CLASH</div>
+        </div>
+
+        <!-- Side 2 -->
+        <div class="battle-side-card">
+          <div class="battle-side-header">
+            <span class="battle-side-name" id="battle-name-p2" style="font-weight: 800;">Player 2</span>
+            <span class="battle-side-power" id="battle-power-p2" style="color: var(--gold); font-weight: 800;">⚡ 0 PWR</span>
+          </div>
+          <div class="battle-hp-bar-wrapper">
+            <div class="battle-hp-fill" id="battle-hp-p2" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Combat Feed -->
+      <div class="battle-combat-feed" id="battle-combat-feed">
+        <div class="battle-log-entry">⚔️ Select squads and click 'SIMULATE SQUAD BATTLE' to commence combat!</div>
+      </div>
+
+      <div class="battle-controls">
+        <button class="btn-primary" id="start-battle-sim-btn" type="button" style="font-size: 1.05rem; padding: 0.75rem 2rem;">
+          🔥 SIMULATE SQUAD BATTLE! 💥
+        </button>
+        <button class="btn-secondary btn-battle-glow" id="start-tournament-btn" type="button" style="font-size: 1.05rem;">
+          🏆 RUN GRAND TOURNAMENT BRACKET 👑
+        </button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- VICTORY / SQUAD COMPLETE MODAL -->
+  <dialog id="victory-modal">
+    <div class="modal-card victory-modal-content">
+      <div style="font-size: 2.8rem; margin-bottom: 0.3rem;">🏆 👑 ⚔️</div>
+      <h2 style="font-family: var(--font-serif); font-size: 1.6rem; color: var(--gold);">DRAFT COMPLETED!</h2>
+      <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.2rem;">All guilds have assembled their 7-member squads!</p>
+
+      <div id="victory-leaderboard" class="victory-leaderboard"></div>
+
+      <div style="display: flex; gap: 0.8rem; justify-content: center; margin-top: 1.2rem; flex-wrap: wrap;">
+        <button class="btn-secondary" id="close-victory-btn" type="button">Inspect Squads 👁️</button>
+        <button class="btn-primary" id="victory-battle-btn" type="button">⚔️ Enter Battle Arena! 🔥</button>
+        <button class="btn-secondary" id="restart-victory-btn" type="button">New Draft 🔄</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- SQUAD POWER DETAILS MODAL -->
+  <dialog id="power-details-modal">
+    <div class="modal-card" style="width: 500px; max-width: 100%;">
+      <div class="roster-header-row">
+        <h2 style="font-family: var(--font-serif); font-size: 1.2rem; color: var(--gold);" id="power-details-title">
+          ⚡ Squad Power Breakdown
+        </h2>
+        <button class="close-modal-btn">&times;</button>
+      </div>
+      <div id="power-details-body" style="font-size: 0.88rem; line-height: 1.6; color: #cbd5e1;"></div>
+    </div>
+  </dialog>
+
+  <!-- Footer -->
+  <footer>
+    <p>Solo Leveling universe character names, lore, and concepts &copy; Chugong, DUBU (REDICE Studio), D&C Media. Offline Multi-Player Draft & Battle Arena.</p>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="characters.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
