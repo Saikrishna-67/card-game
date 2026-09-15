@@ -1,13 +1,14 @@
 /**
- * SOLO LEVELING — RANDOM CARD DRAFT & BATTLE ENGINE (ENHANCED EDITION)
- * Features:
+ * SOLO LEVELING — RANDOM CARD DRAFT & BATTLE ENGINE (STRICT PERMANENT DRAFT EDITION)
+ * Rules:
+ * - Strict No-Repetition: Once drawn, a card is permanently drafted or discarded.
+ * - NO REPLACEMENTS & NO BACKUPS: Once a character is assigned to a squad position,
+ *   that position is permanently locked. Existing characters cannot be replaced,
+ *   swapped, or returned to the pool.
  * - 100% Offline Web Audio Synthesizer + Procedural Ambient BGM Drone
- * - Dynamic 3D Hologram Card Summons with Animated Stat Meters
- * - Interactive Squad Position Swapping (click two slots to swap)
- * - Squad Power Mathematical Breakdown Modal
- * - Full Single-Elimination Grand Tournament Bracket Mode
+ * - 3D Holographic Card Summons with Animated Stat Meters
+ * - Guild Squad Battle Arena with 1v1 & Grand Championship Tournament Bracket
  * - Dimensional Archive & Graveyard Vault
- * - JSON Roster Export & Import
  */
 
 (function () {
@@ -51,8 +52,7 @@
     maxPicksPerPlayer: 7,
     soundEnabled: true,
     bgmEnabled: false,
-    theme: 'shadow',
-    selectedSwapSlot: null // { playerId, roleKey }
+    theme: 'shadow'
   };
 
   // --- 3. WEB AUDIO SYNTHESIZER & PROCEDURAL BGM DRONE ---
@@ -103,7 +103,6 @@
         osc.start(now);
         osc.stop(now + 0.25);
       } else if (type === 'rank_sss') {
-        // Deep Monarch Boom
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(120, now);
         osc.frequency.exponentialRampToValueAtTime(45, now + 0.6);
@@ -119,14 +118,6 @@
         gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
         osc.start(now);
         osc.stop(now + 0.15);
-      } else if (type === 'swap') {
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(520, now);
-        osc.frequency.exponentialRampToValueAtTime(680, now + 0.12);
-        gain.gain.setValueAtTime(0.2, now);
-        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
-        osc.start(now);
-        osc.stop(now + 0.12);
       } else if (type === 'discard') {
         osc.type = 'sawtooth';
         osc.frequency.setValueAtTime(350, now);
@@ -297,7 +288,7 @@
       confetti.forEach((c) => {
         c.x += c.vx;
         c.y += c.vy;
-        c.vy += 0.4; // gravity
+        c.vy += 0.4;
         c.vx *= 0.98;
         c.rotation += c.rotationSpeed;
         c.alpha -= 0.008;
@@ -374,7 +365,6 @@
     state.allCharacters = window.getStoredCharacters();
     state.pool = JSON.parse(JSON.stringify(state.allCharacters));
     state.archive = [];
-    state.selectedSwapSlot = null;
 
     state.players = [];
     for (let i = 0; i < playerCount; i++) {
@@ -430,7 +420,6 @@
 
     updateHeaderStats();
 
-    // Update active highlight in players dock
     state.players.forEach((p, idx) => {
       const cardEl = document.getElementById(`player-card-${p.id}`);
       if (cardEl) {
@@ -443,7 +432,7 @@
     });
   }
 
-  // --- 8. RENDER PLAYERS DOCK & INTERACTIVE SQUAD SWAP ---
+  // --- 8. RENDER PLAYERS DOCK (PERMANENT LOCKED SLOTS — NO REPLACEMENT / NO REMOVAL) ---
   function renderPlayersDock() {
     const dock = document.getElementById('players-dock');
     if (!dock) return;
@@ -461,10 +450,6 @@
       let rolesHTML = '';
       ROLES.forEach((role) => {
         const slotted = player.squad[role.key];
-        const isSwapSelected =
-          state.selectedSwapSlot &&
-          state.selectedSwapSlot.playerId === player.id &&
-          state.selectedSwapSlot.roleKey === role.key;
 
         if (slotted) {
           let tierClass = 'tier-a';
@@ -476,7 +461,7 @@
           const effectivePower = calculateCharacterCombatPower(slotted, role.key);
 
           rolesHTML += `
-            <div class="role-slot-row filled ${isSwapSelected ? 'swap-selected' : ''}" data-player="${player.id}" data-role="${role.key}" title="Click to swap with another slot">
+            <div class="role-slot-row filled" style="cursor:default;" title="Locked: ${slotted.name} (${role.name})">
               <div class="role-tag-name">
                 <span>${role.icon}</span> ${role.name}
               </div>
@@ -484,18 +469,18 @@
                 <span class="slotted-hunter-tier ${tierClass}">${slotted.tier_category}</span>
                 <span class="slotted-hunter-info">${slotted.name}</span>
                 <span class="slotted-hunter-power">⚡ ${(effectivePower / 1000).toFixed(0)}k</span>
-                <button class="btn-slot-action" title="Remove character" data-player="${player.id}" data-role="${role.key}">✕</button>
+                <span style="font-size:0.8rem; color:#94a3b8; margin-left:4px;" title="Permanently Locked">🔒</span>
               </div>
             </div>
           `;
         } else {
           rolesHTML += `
-            <div class="role-slot-row ${isSwapSelected ? 'swap-selected' : ''}" data-player="${player.id}" data-role="${role.key}" title="Click to swap with another slot">
+            <div class="role-slot-row" style="cursor:default;">
               <div class="role-tag-name">
                 <span>${role.icon}</span> ${role.name}
               </div>
               <div class="role-slot-content">
-                <span class="slot-empty-label">+ Empty Slot</span>
+                <span class="slot-empty-label">+ Open Slot</span>
               </div>
             </div>
           `;
@@ -520,36 +505,6 @@
       dock.appendChild(pCard);
     });
 
-    // Attach click-to-swap on slots
-    dock.querySelectorAll('.role-slot-row').forEach((slot) => {
-      slot.addEventListener('click', (e) => {
-        if (e.target.classList.contains('btn-slot-action')) return;
-        const pId = slot.dataset.player;
-        const roleKey = slot.dataset.role;
-        handleSlotSwapClick(pId, roleKey);
-      });
-    });
-
-    // Attach remove handlers
-    dock.querySelectorAll('.btn-slot-action').forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const pId = btn.dataset.player;
-        const roleKey = btn.dataset.role;
-        const targetPlayer = state.players.find((p) => p.id === pId);
-        if (targetPlayer && targetPlayer.squad[roleKey]) {
-          const removed = targetPlayer.squad[roleKey];
-          delete targetPlayer.squad[roleKey];
-          state.pool.push(removed);
-          // Remove from archive or mark removed
-          state.archive = state.archive.filter((a) => a.character.id !== removed.id);
-          playSound('click');
-          renderPlayersDock();
-          updateTurnHUD();
-        }
-      });
-    });
-
     // Attach power breakdown click
     dock.querySelectorAll('.player-power-pill').forEach((pill) => {
       pill.addEventListener('click', () => {
@@ -560,45 +515,7 @@
     });
   }
 
-  function handleSlotSwapClick(pId, roleKey) {
-    const player = state.players.find((p) => p.id === pId);
-    if (!player) return;
-
-    if (!state.selectedSwapSlot) {
-      // First selection
-      state.selectedSwapSlot = { playerId: pId, roleKey };
-      playSound('click');
-      renderPlayersDock();
-    } else {
-      if (state.selectedSwapSlot.playerId !== pId) {
-        // Can only swap within same player squad
-        state.selectedSwapSlot = { playerId: pId, roleKey };
-        playSound('click');
-        renderPlayersDock();
-      } else {
-        // Swap slots
-        const firstRole = state.selectedSwapSlot.roleKey;
-        const secondRole = roleKey;
-
-        if (firstRole !== secondRole) {
-          const temp = player.squad[firstRole];
-          player.squad[firstRole] = player.squad[secondRole];
-          player.squad[secondRole] = temp;
-
-          if (!player.squad[firstRole]) delete player.squad[firstRole];
-          if (!player.squad[secondRole]) delete player.squad[secondRole];
-
-          playSound('swap');
-        }
-
-        state.selectedSwapSlot = null;
-        renderPlayersDock();
-        updateTurnHUD();
-      }
-    }
-  }
-
-  // --- 9. DRAW CARD & REVEAL FLOW ---
+  // --- 9. DRAW CARD & REVEAL FLOW (NO REPLACEMENTS PERMITTED) ---
   function drawRandomCard() {
     if (state.pool.length === 0) {
       alert('⚡ The Dimensional Gate is empty! All hunters have been drafted.');
@@ -607,7 +524,6 @@
 
     playSound('draw');
 
-    // Pick random without bias
     const randomIndex = Math.floor(Math.random() * state.pool.length);
     const drawn = state.pool[randomIndex];
     state.drawnCard = drawn;
@@ -632,7 +548,6 @@
     document.getElementById('reveal-title').textContent = char.title || char.role;
     document.getElementById('reveal-power-num').textContent = `⚡ ${char.power_number.toLocaleString()} PWR (PL: ${char.power_level})`;
 
-    // 6 animated stat bars
     const stats = char.stats || {
       raw_power: 8,
       hax: 8,
@@ -649,7 +564,6 @@
     document.getElementById('stat-synergy').textContent = `${stats.synergy}`;
     document.getElementById('stat-battle-iq').textContent = `${stats.battle_iq}`;
 
-    // Trigger width animations
     setTimeout(() => {
       document.getElementById('bar-raw-power').style.width = `${stats.raw_power * 10}%`;
       document.getElementById('bar-hax').style.width = `${stats.hax * 10}%`;
@@ -663,7 +577,7 @@
     document.getElementById('reveal-feats').textContent = `🏆 Feats: ${char.feats}`;
     document.getElementById('reveal-quote').textContent = `"${char.quote || 'Arise.'}"`;
 
-    // Role assignment buttons for active player
+    // Role assignment buttons for active player (STRICT NO REPLACEMENT RULE)
     const roleBtnsContainer = document.getElementById('reveal-role-buttons');
     roleBtnsContainer.innerHTML = '';
 
@@ -675,12 +589,24 @@
 
       const btn = document.createElement('button');
       btn.type = 'button';
-      btn.className = `btn-assign-role ${isEligible ? 'recommended' : ''}`;
-      btn.innerHTML = `${role.icon} ${role.name} ${isSlotOccupied ? '(Replace)' : ''}`;
 
-      btn.addEventListener('click', () => {
-        assignCardToRole(activePlayer, role.key, char);
-      });
+      if (isSlotOccupied) {
+        // Disabled: NO REPLACEMENT ALLOWED
+        btn.disabled = true;
+        btn.className = 'btn-assign-role';
+        btn.style.opacity = '0.35';
+        btn.style.cursor = 'not-allowed';
+        btn.style.borderColor = 'rgba(255,255,255,0.1)';
+        btn.innerHTML = `${role.icon} ${role.name} <span style="font-size:0.7rem; color:#94a3b8;">(Filled 🔒)</span>`;
+      } else {
+        // Open slot: can assign
+        btn.className = `btn-assign-role ${isEligible ? 'recommended' : ''}`;
+        btn.innerHTML = `${role.icon} ${role.name} ${isEligible ? '⭐ (Best Fit)' : ''}`;
+
+        btn.addEventListener('click', () => {
+          assignCardToRole(activePlayer, role.key, char);
+        });
+      }
 
       roleBtnsContainer.appendChild(btn);
     });
@@ -689,22 +615,20 @@
   }
 
   function assignCardToRole(player, roleKey, char) {
-    // If slot had an existing card, return it to the pool
+    // Strict safeguard: cannot overwrite occupied slot
     if (player.squad[roleKey]) {
-      const oldChar = player.squad[roleKey];
-      state.pool.push(oldChar);
-      state.archive = state.archive.filter((a) => a.character.id !== oldChar.id);
+      alert('This slot is already filled! No replacements allowed.');
+      return;
     }
 
     player.squad[roleKey] = char;
 
-    // Remove from active pool (Strict No-Repetition)
+    // Permanently consume from active pool (Strict No-Repetition, No Backup)
     const pIdx = state.pool.findIndex((c) => c.id === char.id);
     if (pIdx !== -1) {
       state.pool.splice(pIdx, 1);
     }
 
-    // Log to archive
     state.archive.push({
       character: char,
       status: 'assigned',
@@ -730,6 +654,7 @@
   function discardCard() {
     if (!state.drawnCard) return;
 
+    // Permanently remove from pool (No Backup)
     const pIdx = state.pool.findIndex((c) => c.id === state.drawnCard.id);
     if (pIdx !== -1) {
       state.pool.splice(pIdx, 1);
@@ -849,7 +774,7 @@
           </div>
           <div style="font-size:0.75rem; color:var(--gold);">⚡ ${char.power_number.toLocaleString()} PWR</div>
           <div style="font-size:0.78rem; margin-top:0.3rem;">
-            ${item.status === 'assigned' ? `<span style="color:#06d6a0;">✅ Drafted by ${item.player} (${item.role})</span>` : `<span style="color:#ff0054;">🗑️ Discarded by ${item.player}</span>`}
+            ${item.status === 'assigned' ? `<span style="color:#06d6a0;">✅ Drafted by ${item.player} (${item.role})</span>` : `<span style="color:#ff0054;">🗑️ Discarded by ${item.player} (No Backup)</span>`}
           </div>
         `;
         grid.appendChild(card);
@@ -1023,12 +948,10 @@
     const feed = document.getElementById('battle-combat-feed');
     feed.innerHTML = `<div class="battle-log-entry" style="color:var(--gold);">🏆 <strong>COMMENCING GRAND GUILD TOURNAMENT BRACKET...</strong></div>`;
 
-    // Sort players by power
     const bracket = [...state.players].sort(
       (a, b) => calculateSquadPower(b) - calculateSquadPower(a)
     );
 
-    let roundIndex = 1;
     let contenders = [...bracket];
 
     function runTournamentRound() {
@@ -1041,7 +964,6 @@
             const pAPwr = calculateSquadPower(pA);
             const pBPwr = calculateSquadPower(pB);
             const winner = pAPwr >= pBPwr ? pA : pB;
-            const loser = pAPwr >= pBPwr ? pB : pA;
 
             const entry = document.createElement('div');
             entry.className = 'battle-log-entry';
@@ -1051,11 +973,10 @@
 
             nextRound.push(winner);
           } else {
-            nextRound.push(contenders[i]); // Bye
+            nextRound.push(contenders[i]);
           }
         }
         contenders = nextRound;
-        roundIndex++;
         setTimeout(runTournamentRound, 1000);
       } else {
         const champion = contenders[0];
