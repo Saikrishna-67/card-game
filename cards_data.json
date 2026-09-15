@@ -6,6 +6,7 @@
     "role": "Shadow Monarch / All-Rounder",
     "tier": "SSS — GOD TIER",
     "tier_category": "SSS",
+    "power_number": 10000000,
     "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
     "description": "The complete incarnation of Death and the absolute ruler of the Shadow Army. Wields infinite mana, sovereign authority over souls, and physical capabilities that transcend mortal dimensions.",
     "abilities": [
@@ -14,14 +15,7 @@
       "Stealth, Shadow Exchange & Complete Regeneration"
     ],
     "power_level": 100,
-    "stats": {
-      "raw_power": 10.0,
-      "hax": 10.0,
-      "speed": 10.0,
-      "durability": 10.0,
-      "synergy": 10.0,
-      "battle_iq": 10.0
-    },
+    "stats": { "raw_power": 10.0, "hax": 10.0, "speed": 10.0, "durability": 10.0, "synergy": 10.0, "battle_iq": 10.0 },
     "feats": "Defeated Antares (Monarch of Destruction), wiped out Monarch armies alone, extracted millions of shadows into his personal dimension.",
     "best_function": "Ultimate commander, devastating damage dealer, and absolute battlefield controller.",
     "team_value": "God Tier"
@@ -33,6 +27,7 @@
     "role": "Original Shadow Monarch",
     "tier": "SSS — GOD TIER",
     "tier_category": "SSS",
+    "power_number": 9900000,
     "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
     "description": "The primordial Ruler who inherited the power of Death from the Absolute Being. Possesses unfathomable cosmic power and commands the ancestral core of the Shadow Army.",
     "abilities": [
@@ -41,14 +36,7 @@
       "Astral Projection & Eternal Shadow Armies"
     ],
     "power_level": 100,
-    "stats": {
-      "raw_power": 10.0,
-      "hax": 10.0,
-      "speed": 9.8,
-      "durability": 10.0,
-      "synergy": 9.9,
-      "battle_iq": 10.0
-    },
+    "stats": { "raw_power": 10.0, "hax": 10.0, "speed": 9.8, "durability": 10.0, "synergy": 9.9, "battle_iq": 10.0 },
     "feats": "Slaughtered both Ruler and Monarch legions simultaneously in the ancient primordial war.",
     "best_function": "Supreme combat commander, transcendent frontline fighter, and immortal army leader.",
     "team_value": "God Tier"
@@ -60,6 +48,7 @@
     "role": "Monarch of Destruction",
     "tier": "SSS — GOD TIER",
     "tier_category": "SSS",
+    "power_number": 9800000,
     "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK"],
     "description": "The strongest and most destructive Monarch in existence. Incarnation of total annihilation who can transform into an apocalyptic red dragon and command legions of ancient dragons.",
     "abilities": [
@@ -68,14 +57,7 @@
       "Telepathic Army Command & Cataclysmic Pyromancy"
     ],
     "power_level": 99,
-    "stats": {
-      "raw_power": 10.0,
-      "hax": 9.7,
-      "speed": 9.6,
-      "durability": 10.0,
-      "synergy": 9.2,
-      "battle_iq": 9.5
-    },
+    "stats": { "raw_power": 10.0, "hax": 9.7, "speed": 9.6, "durability": 10.0, "synergy": 9.2, "battle_iq": 9.5 },
     "feats": "Turned entire continents to ash and pushed Sung Jinwoo to the absolute limit in a multi-dimensional clash.",
     "best_function": "Ultimate offensive powerhouse, destructive area annihilator, and terrifying frontline monster.",
     "team_value": "God Tier"
@@ -87,6 +69,7 @@
     "role": "Ruler's Vessel / Master Combatant",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 5200000,
     "eligible_roles": ["LEADER", "FIGHTER", "TANK", "SUPPORT", "ASSASSIN"],
     "description": "Father of Sung Jinwoo and the strongest human vessel empowered directly by the Rulers. Possesses divine celestial aura, blinding speed, and high-tier telekinetic combat prowess.",
     "abilities": [
@@ -95,14 +78,7 @@
       "Divine Durability & Monarch-Stalling Tenacity"
     ],
     "power_level": 94,
-    "stats": {
-      "raw_power": 9.3,
-      "hax": 9.0,
-      "speed": 9.6,
-      "durability": 9.2,
-      "synergy": 9.0,
-      "battle_iq": 9.7
-    },
+    "stats": { "raw_power": 9.3, "hax": 9.0, "speed": 9.6, "durability": 9.2, "synergy": 9.0, "battle_iq": 9.7 },
     "feats": "Fought off both the Monarch of Frost and Monarch of Fangs simultaneously to protect his son's awakening.",
     "best_function": "High-level combat leader, agile frontline assassin, and tenacious disruptor.",
     "team_value": "Elite"
@@ -114,6 +90,7 @@
     "role": "Grand Marshal Shadow",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 5400000,
     "eligible_roles": ["LEADER", "FIGHTER", "TANK", "SUPPORT", "ASSASSIN"],
     "description": "Born from the fruit of the World Tree and original servant of Ashborn. He wields a massive segmented whip-sword and possesses wings capable of generating devastating gale-force shockwaves.",
     "abilities": [
@@ -122,14 +99,7 @@
       "Infinite Shadow Regeneration & Absolute Army Discipline"
     ],
     "power_level": 95,
-    "stats": {
-      "raw_power": 9.5,
-      "hax": 9.1,
-      "speed": 9.4,
-      "durability": 9.6,
-      "synergy": 9.8,
-      "battle_iq": 9.6
-    },
+    "stats": { "raw_power": 9.5, "hax": 9.1, "speed": 9.4, "durability": 9.6, "synergy": 9.8, "battle_iq": 9.6 },
     "feats": "Overpowered Marshal Beru in single combat with casual ease and commanded millions of shadow troops.",
     "best_function": "Elite commander, supreme frontline vanguard, and immovable defensive anchor.",
     "team_value": "Elite"
@@ -141,6 +111,7 @@
     "role": "Ant King / Shadow Marshal",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4900000,
     "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
     "description": "The mutant Ant King evolved through predation into an unstoppable apex predator. As a Shadow Marshal, he combines ferocious speed, hyper-regeneration, venom, and potent healing magic.",
     "abilities": [
@@ -149,14 +120,7 @@
       "Healing Magic, Telepathy & Intimidation Roar"
     ],
     "power_level": 93,
-    "stats": {
-      "raw_power": 9.2,
-      "hax": 9.2,
-      "speed": 9.8,
-      "durability": 9.1,
-      "synergy": 9.5,
-      "battle_iq": 9.4
-    },
+    "stats": { "raw_power": 9.2, "hax": 9.2, "speed": 9.8, "durability": 9.1, "synergy": 9.5, "battle_iq": 9.4 },
     "feats": "Annihilated multiple Japanese and Korean S-Rank hunters in minutes on Jeju Island and stood against Monarchs.",
     "best_function": "High-velocity assassin, vicious brawler, and tactical frontline disruptor.",
     "team_value": "Elite"
@@ -168,6 +132,7 @@
     "role": "National-Level Hunter / Ruler's Vessel",
     "tier": "S — NATIONAL LEVEL",
     "tier_category": "S",
+    "power_number": 2300000,
     "eligible_roles": ["LEADER", "FIGHTER", "TANK"],
     "description": "The top-ranked hunter in the United States and the undisputed physical colossus of humanity. Wields the Spiritual Body Manifestation of a Ruler with unmatched kinetic impact.",
     "abilities": [
@@ -176,14 +141,7 @@
       "Smash / Power of the Ruler (Shockwaves that shatter skyscrapers)"
     ],
     "power_level": 90,
-    "stats": {
-      "raw_power": 9.4,
-      "hax": 8.5,
-      "speed": 8.4,
-      "durability": 9.8,
-      "synergy": 8.8,
-      "battle_iq": 8.7
-    },
+    "stats": { "raw_power": 9.4, "hax": 8.5, "speed": 8.4, "durability": 9.8, "synergy": 8.8, "battle_iq": 8.7 },
     "feats": "Survived a direct beatdown from the Monarch of Iron Body and subdued Kamish the Dragon during the first raid.",
     "best_function": "Supreme human physical tank, frontline battering ram, and crowd-controlling leader.",
     "team_value": "Very High"
@@ -195,6 +153,7 @@
     "role": "National-Level Hunter / Ruler's Vessel",
     "tier": "S — NATIONAL LEVEL",
     "tier_category": "S",
+    "power_number": 2100000,
     "eligible_roles": ["LEADER", "FIGHTER", "TANK", "ASSASSIN"],
     "description": "China's greatest hunter and premier swordmaster. Channels the divine telekinesis and celestial aura of a Ruler through dual bladed slashes of monstrous reach and speed.",
     "abilities": [
@@ -203,14 +162,7 @@
       "Instantaneous Flash Step & Giant-Slaying Swordplay"
     ],
     "power_level": 89,
-    "stats": {
-      "raw_power": 9.2,
-      "hax": 8.4,
-      "speed": 9.5,
-      "durability": 8.8,
-      "synergy": 8.7,
-      "battle_iq": 9.3
-    },
+    "stats": { "raw_power": 9.2, "hax": 8.4, "speed": 9.5, "durability": 8.8, "synergy": 8.7, "battle_iq": 9.3 },
     "feats": "Effortlessly slaughtered an army of giant-type dungeon monsters emerging from an S-Rank gate on China's coast.",
     "best_function": "Blistering melee hyper-carry, precision giant-slayer, and tactical offensive captain.",
     "team_value": "Very High"
@@ -222,6 +174,7 @@
     "role": "National-Level Hunter / Ruler's Vessel",
     "tier": "S — NATIONAL LEVEL",
     "tier_category": "S",
+    "power_number": 1900000,
     "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK"],
     "description": "One of the five National-Level Hunters, acting as the divine vessel for a Ruler. Capable of complete Spiritual Body Manifestation, turning into a colossal titan of incandescent fire.",
     "abilities": [
@@ -230,14 +183,7 @@
       "Ruler's Authority & Omnidirectional Blast Waves"
     ],
     "power_level": 88,
-    "stats": {
-      "raw_power": 9.3,
-      "hax": 8.6,
-      "speed": 8.5,
-      "durability": 8.9,
-      "synergy": 8.5,
-      "battle_iq": 8.8
-    },
+    "stats": { "raw_power": 9.3, "hax": 8.6, "speed": 8.5, "durability": 8.9, "synergy": 8.5, "battle_iq": 8.8 },
     "feats": "Forced three Monarchs (Sillad, Rakan, and Tarnak) to team up and ambush him simultaneously in his mansion.",
     "best_function": "Massive area-of-effect nuker, blazing frontline brawler, and overwhelming offensive anchor.",
     "team_value": "Very High"
@@ -249,6 +195,7 @@
     "role": "Hunter Association Chairman / Ruler's Vessel",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4500000,
     "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT"],
     "description": "The venerable chairman of the Korean Hunter Association whose frail mortal heart restrained the immense spirit of the Brightest Fragment of Light. In combat, his radiant blows shatter solid stone.",
     "abilities": [
@@ -257,14 +204,7 @@
       "Unrivaled Battle Wisdom & Tactical Command"
     ],
     "power_level": 91,
-    "stats": {
-      "raw_power": 9.1,
-      "hax": 8.9,
-      "speed": 8.8,
-      "durability": 9.0,
-      "synergy": 9.6,
-      "battle_iq": 9.9
-    },
+    "stats": { "raw_power": 9.1, "hax": 8.9, "speed": 8.8, "durability": 9.0, "synergy": 9.6, "battle_iq": 9.9 },
     "feats": "Fought tooth and nail against the Monarch of Frost, enduring lethal icy punctures to protect humanity's secrets.",
     "best_function": "Inspiring veteran commander, high-impact brawler, and master tactical strategist.",
     "team_value": "Elite"
@@ -276,6 +216,7 @@
     "role": "Monarch of Fangs",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4800000,
     "eligible_roles": ["FIGHTER", "TANK", "ASSASSIN"],
     "description": "The savage ruler of wild beast humanoids and ancient predators. Capable of monstrous lupine transformation with hypersonic speed, razor claws, and instinctual savagery.",
     "abilities": [
@@ -284,14 +225,7 @@
       "Telekinetic Rend & Flesh-Tearing Claws"
     ],
     "power_level": 92,
-    "stats": {
-      "raw_power": 9.3,
-      "hax": 8.8,
-      "speed": 9.7,
-      "durability": 9.2,
-      "synergy": 8.4,
-      "battle_iq": 9.0
-    },
+    "stats": { "raw_power": 9.3, "hax": 8.8, "speed": 9.7, "durability": 9.2, "synergy": 8.4, "battle_iq": 9.0 },
     "feats": "Ambushed Christopher Reed and fought Sung Jinwoo in the Monarch dimensional skirmish.",
     "best_function": "Terrifying flank assassin, hyper-aggressive frontline beast, and high-speed shredder.",
     "team_value": "Elite"
@@ -303,6 +237,7 @@
     "role": "Monarch of Frost",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4900000,
     "eligible_roles": ["FIGHTER", "MAGE", "TANK"],
     "description": "The sovereign of eternal winter and absolute zero frost. Summons ice golems, blizzard spears, and deep-freeze domains that instantly paralyze cellular motion.",
     "abilities": [
@@ -311,14 +246,7 @@
       "Frost Golem Summoning & Blizzard Tempest"
     ],
     "power_level": 93,
-    "stats": {
-      "raw_power": 9.1,
-      "hax": 9.4,
-      "speed": 9.1,
-      "durability": 9.3,
-      "synergy": 8.9,
-      "battle_iq": 9.2
-    },
+    "stats": { "raw_power": 9.1, "hax": 9.4, "speed": 9.1, "durability": 9.3, "synergy": 8.9, "battle_iq": 9.2 },
     "feats": "Killed Go Gunhee and impaled Sung Jinwoo's mortal heart before the true Shadow Monarch fully awakened.",
     "best_function": "Zone-controlling cryo mage, immobilizer, and durable frontline glacier.",
     "team_value": "Elite"
@@ -330,6 +258,7 @@
     "role": "Monarch of White Flames",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4700000,
     "eligible_roles": ["FIGHTER", "MAGE", "TANK"],
     "description": "The demonic monarch atop the Demon Castle who wields white-hot lightning and hellfire swords while riding the twin-headed ancient wyvern Kaisellin.",
     "abilities": [
@@ -338,14 +267,7 @@
       "Dragon Breath Link & Storm Armor"
     ],
     "power_level": 92,
-    "stats": {
-      "raw_power": 9.4,
-      "hax": 9.0,
-      "speed": 9.0,
-      "durability": 9.2,
-      "synergy": 8.7,
-      "battle_iq": 9.1
-    },
+    "stats": { "raw_power": 9.4, "hax": 9.0, "speed": 9.0, "durability": 9.2, "synergy": 8.7, "battle_iq": 9.1 },
     "feats": "Rivaled the primordial shadow armies in the ancient celestial wars.",
     "best_function": "Devastating hybrid elemental striker, thunder mage, and frontline warlord.",
     "team_value": "Elite"
@@ -357,6 +279,7 @@
     "role": "Monarch of the Iron Body",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4600000,
     "eligible_roles": ["FIGHTER", "TANK"],
     "description": "The sovereign of indestructible density and physical hardness. His body cannot be pierced by ordinary dimensional weaponry or elemental attacks.",
     "abilities": [
@@ -365,14 +288,7 @@
       "Kinetic Shockwave Absorption"
     ],
     "power_level": 91,
-    "stats": {
-      "raw_power": 9.3,
-      "hax": 8.5,
-      "speed": 8.6,
-      "durability": 9.9,
-      "synergy": 8.5,
-      "battle_iq": 8.9
-    },
+    "stats": { "raw_power": 9.3, "hax": 8.5, "speed": 8.6, "durability": 9.9, "synergy": 8.5, "battle_iq": 8.9 },
     "feats": "Broke Thomas Andre's arm and tanked direct national-level strikes without flinching.",
     "best_function": "Unbreakable frontline tank and heavy kinetic brawler.",
     "team_value": "Elite"
@@ -384,6 +300,7 @@
     "role": "Monarch of the Beginning",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4700000,
     "eligible_roles": ["FIGHTER", "TANK"],
     "description": "The colossal King of Giants imprisoned within Japan's massive S-Rank Gate. Even while shackled with mana-draining divine chains, his presence warped the dimensional boundary.",
     "abilities": [
@@ -392,14 +309,7 @@
       "Monarch-grade Durability & Mana Resistance"
     ],
     "power_level": 92,
-    "stats": {
-      "raw_power": 9.6,
-      "hax": 8.7,
-      "speed": 8.0,
-      "durability": 9.7,
-      "synergy": 8.2,
-      "battle_iq": 8.8
-    },
+    "stats": { "raw_power": 9.6, "hax": 8.7, "speed": 8.0, "durability": 9.7, "synergy": 8.2, "battle_iq": 8.8 },
     "feats": "Required the Rulers' most complex ancient sealing formations to contain his raw power.",
     "best_function": "Colossal frontline wall and massive physical juggernaut.",
     "team_value": "Elite"
@@ -411,6 +321,7 @@
     "role": "Monarch of Plagues",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4600000,
     "eligible_roles": ["FIGHTER", "MAGE"],
     "description": "The queen of swarming horrors, toxic secretions, and parasitic diseases. Can dissolve flesh in seconds, manipulate millions of venomous organisms, and resurrect rotting cadavers.",
     "abilities": [
@@ -419,14 +330,7 @@
       "Chitin Shielding & Cellular Regeneration"
     ],
     "power_level": 91,
-    "stats": {
-      "raw_power": 8.9,
-      "hax": 9.5,
-      "speed": 9.2,
-      "durability": 9.0,
-      "synergy": 8.8,
-      "battle_iq": 9.1
-    },
+    "stats": { "raw_power": 8.9, "hax": 9.5, "speed": 9.2, "durability": 9.0, "synergy": 8.8, "battle_iq": 9.1 },
     "feats": "Corrupted massive city districts and fought Beru and Sung Jinwoo in a multi-front toxic clash.",
     "best_function": "Corrosive status-effect mage, swarm summoner, and deadly attrition fighter.",
     "team_value": "Elite"
@@ -438,6 +342,7 @@
     "role": "Monarch of Transfiguration",
     "tier": "SS — MONARCH / RULER ELITE",
     "tier_category": "SS",
+    "power_number": 4600000,
     "eligible_roles": ["FIGHTER", "MAGE"],
     "description": "The ancient sorcerer Monarch who commands demonic illusions, shape-shifting transformations, and dimensional distortion magic.",
     "abilities": [
@@ -446,14 +351,7 @@
       "Demonic Sorcery Array"
     ],
     "power_level": 91,
-    "stats": {
-      "raw_power": 9.0,
-      "hax": 9.6,
-      "speed": 8.9,
-      "durability": 8.9,
-      "synergy": 8.9,
-      "battle_iq": 9.5
-    },
+    "stats": { "raw_power": 9.0, "hax": 9.6, "speed": 8.9, "durability": 8.9, "synergy": 8.9, "battle_iq": 9.5 },
     "feats": "Operated as Antares's primary arcane strategist and magical siege commander.",
     "best_function": "Master arcane controller, illusionist, and strategic backline nuke.",
     "team_value": "Elite"
@@ -465,6 +363,7 @@
     "role": "Shadow Marshal / Sword Saint",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 850000,
     "eligible_roles": ["FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
     "description": "Jinwoo's very first high-level shadow knight who promoted all the way to Marshal. A noble chivalric swordsman who channels lightning through dual greatswords with peerless precision.",
     "abilities": [
@@ -473,14 +372,7 @@
       "Tactical Shadow Form & Infinite Regeneration"
     ],
     "power_level": 87,
-    "stats": {
-      "raw_power": 8.7,
-      "hax": 8.4,
-      "speed": 9.3,
-      "durability": 8.9,
-      "synergy": 9.7,
-      "battle_iq": 9.6
-    },
+    "stats": { "raw_power": 8.7, "hax": 8.4, "speed": 9.3, "durability": 8.9, "synergy": 9.7, "battle_iq": 9.6 },
     "feats": "Mastered telekinesis to wield blades remotely and severed high-ranking Monarch commanders in battle.",
     "best_function": "Versatile swordmaster, deadly precision assassin, and reliable tactical commander.",
     "team_value": "Elite"
@@ -492,6 +384,7 @@
     "role": "S-Rank Hunter / Sword Master",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 680000,
     "eligible_roles": ["FIGHTER", "SUPPORT", "ASSASSIN"],
     "description": "Korea's 9th S-Rank hunter and the Vice Master of the Hunters Guild. Possesses extraordinary sensory perception for mana and strikes with blinding sword velocity and light-infused dancing steps.",
     "abilities": [
@@ -500,14 +393,7 @@
       "Acrobatic Hypersonic Sword Technique"
     ],
     "power_level": 84,
-    "stats": {
-      "raw_power": 8.3,
-      "hax": 7.9,
-      "speed": 9.4,
-      "durability": 7.9,
-      "synergy": 9.1,
-      "battle_iq": 9.2
-    },
+    "stats": { "raw_power": 8.3, "hax": 7.9, "speed": 9.4, "durability": 7.9, "synergy": 9.1, "battle_iq": 9.2 },
     "feats": "Defeated Igris in a formal sparring duel and easily severed Queen Ant guardians during the Jeju raid.",
     "best_function": "High-agility assassin, swift duelist, and precision combat supporter.",
     "team_value": "Very High"
@@ -519,6 +405,7 @@
     "role": "S-Rank Hunter / Beast Transformation",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 640000,
     "eligible_roles": ["FIGHTER", "TANK"],
     "description": "Master of the prestigious White Tiger Guild. He can undergo partial or full transformation into a monstrous White Tiger beast, exponentially magnifying muscle mass, speed, and regenerative toughness.",
     "abilities": [
@@ -527,14 +414,7 @@
       "Crushing Claws & Apex Predator Roar"
     ],
     "power_level": 83,
-    "stats": {
-      "raw_power": 8.7,
-      "hax": 7.8,
-      "speed": 8.8,
-      "durability": 8.9,
-      "synergy": 8.6,
-      "battle_iq": 8.9
-    },
+    "stats": { "raw_power": 8.7, "hax": 7.8, "speed": 8.8, "durability": 8.9, "synergy": 8.6, "battle_iq": 8.9 },
     "feats": "Clashed claw-to-blade against S-Rank assassin Kang Taeshik and held off red gate monsters with ease.",
     "best_function": "Fierce brawler, resilient secondary tank, and physical vanguard.",
     "team_value": "Very High"
@@ -546,6 +426,7 @@
     "role": "S-Rank Mage / Master of Fire",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 690000,
     "eligible_roles": ["MAGE", "SUPPORT"],
     "description": "Guild Master of Hunters and recognized as South Korea's strongest magic-type hunter. Specializes in incinerating entire dungeon zones with apocalyptic flame spears and flame tornadoes.",
     "abilities": [
@@ -554,14 +435,7 @@
       "Flame Barrier & Strategic Fire Bombardment"
     ],
     "power_level": 84,
-    "stats": {
-      "raw_power": 8.8,
-      "hax": 8.1,
-      "speed": 8.0,
-      "durability": 7.8,
-      "synergy": 8.9,
-      "battle_iq": 9.2
-    },
+    "stats": { "raw_power": 8.8, "hax": 8.1, "speed": 8.0, "durability": 7.8, "synergy": 8.9, "battle_iq": 9.2 },
     "feats": "Vaporized entire swarms of giant monster ants with a single cast of his signature firestorm.",
     "best_function": "Massive long-range fire nuker and battlefield zone controller.",
     "team_value": "Very High"
@@ -573,6 +447,7 @@
     "role": "S-Rank Hunter / Draw Sword Guild Master",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 750000,
     "eligible_roles": ["FIGHTER", "ASSASSIN"],
     "description": "The undisputed apex hunter of Japan and leader of the elite Draw Sword Guild. A ruthless swordsman whose katana draws slice through sound barriers and heavily armored monstrosities.",
     "abilities": [
@@ -581,14 +456,7 @@
       "Dual Stance Slicing Form"
     ],
     "power_level": 85,
-    "stats": {
-      "raw_power": 8.5,
-      "hax": 7.9,
-      "speed": 9.3,
-      "durability": 8.0,
-      "synergy": 8.2,
-      "battle_iq": 9.1
-    },
+    "stats": { "raw_power": 8.5, "hax": 7.9, "speed": 9.3, "durability": 8.0, "synergy": 8.2, "battle_iq": 9.1 },
     "feats": "Sparred evenly with pre-Monarch Sung Jinwoo, pushing him to reveal deadly killing intent.",
     "best_function": "Hypersonic assassin, lethal frontline sword striker, and tempo controller.",
     "team_value": "Very High"
@@ -600,6 +468,7 @@
     "role": "S-Rank Hunter / Energy Combatant",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 670000,
     "eligible_roles": ["FIGHTER"],
     "description": "The strongest hunter in Germany, ranked 12th in the world. Channels condensed magical gauntlet blasts and heavy energy artillery into frontline melee impacts.",
     "abilities": [
@@ -608,14 +477,7 @@
       "High-Output Melee Barrage"
     ],
     "power_level": 84,
-    "stats": {
-      "raw_power": 8.6,
-      "hax": 8.0,
-      "speed": 8.5,
-      "durability": 8.6,
-      "synergy": 8.6,
-      "battle_iq": 9.0
-    },
+    "stats": { "raw_power": 8.6, "hax": 8.0, "speed": 8.5, "durability": 8.6, "synergy": 8.6, "battle_iq": 9.0 },
     "feats": "Resisted the psychic pressure of Thomas Andre and fought bravely in the international hunter summit crisis.",
     "best_function": "Heavy frontline brawler and disciplined European champion.",
     "team_value": "High"
@@ -627,6 +489,7 @@
     "role": "S-Rank Hunter / Bruiser",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 600000,
     "eligible_roles": ["FIGHTER", "ASSASSIN"],
     "description": "A notoriously vicious Korean S-Rank hunter who joined America's Scavenger Guild. Possesses brutal physical power, wind manipulation, and ruthless execution techniques.",
     "abilities": [
@@ -635,14 +498,7 @@
       "Bloodthirsty Grappling & Skull Crush"
     ],
     "power_level": 82,
-    "stats": {
-      "raw_power": 8.5,
-      "hax": 7.7,
-      "speed": 8.6,
-      "durability": 8.4,
-      "synergy": 7.5,
-      "battle_iq": 8.3
-    },
+    "stats": { "raw_power": 8.5, "hax": 7.7, "speed": 8.6, "durability": 8.4, "synergy": 7.5, "battle_iq": 8.3 },
     "feats": "Dominated high-rank dungeon bosses with bare hands and terrorized international guilds.",
     "best_function": "Brutal frontline slugger and merciless executioner.",
     "team_value": "High"
@@ -654,6 +510,7 @@
     "role": "S-Rank Hunter / Heavy Tank",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 630000,
     "eligible_roles": ["FIGHTER", "TANK"],
     "description": "The stalwart Master of the Fame Myreung Guild. Specializes in gigantification magic and kinetic impact absorption, creating an unshakeable shield for allied raid teams.",
     "abilities": [
@@ -662,14 +519,7 @@
       "Taunt Roar & Seismic Quake"
     ],
     "power_level": 83,
-    "stats": {
-      "raw_power": 8.4,
-      "hax": 7.8,
-      "speed": 7.6,
-      "durability": 9.2,
-      "synergy": 9.0,
-      "battle_iq": 9.0
-    },
+    "stats": { "raw_power": 8.4, "hax": 7.8, "speed": 7.6, "durability": 9.2, "synergy": 9.0, "battle_iq": 9.0 },
     "feats": "Held the defensive frontline against hundreds of mutant ant warriors during the Jeju Island assault.",
     "best_function": "Elite human frontline tank and protective vanguard anchor.",
     "team_value": "High"
@@ -681,6 +531,7 @@
     "role": "Shadow Mage Commander",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 800000,
     "eligible_roles": ["MAGE", "SUPPORT"],
     "description": "The shadow extraction of the Great Shaman Kargalgan. Armed with the Orb of Avarice, his magical firepower doubles, unleashing continent-shaking flame spheres, gravity magic, and hymns of frenzy.",
     "abilities": [
@@ -689,14 +540,7 @@
       "Gravity Hex & Telekinetic Shielding"
     ],
     "power_level": 87,
-    "stats": {
-      "raw_power": 9.1,
-      "hax": 9.2,
-      "speed": 7.9,
-      "durability": 8.3,
-      "synergy": 9.5,
-      "battle_iq": 9.3
-    },
+    "stats": { "raw_power": 9.1, "hax": 9.2, "speed": 7.9, "durability": 8.3, "synergy": 9.5, "battle_iq": 9.3 },
     "feats": "Incinerated hundreds of high-ranking demons and giant invaders with single spells using the Orb of Avarice.",
     "best_function": "Devastating backline artillery nuke and mass team enhancer.",
     "team_value": "Elite"
@@ -708,6 +552,7 @@
     "role": "High Orc Shaman / Curse Master",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 720000,
     "eligible_roles": ["MAGE", "SUPPORT"],
     "description": "The prime living High Orc Shaman whose ancient blood chants can bend gravity, bless entire battalions with giant-size strength, and cast protective dome barriers resistant to high-grade magic.",
     "abilities": [
@@ -716,14 +561,7 @@
       "Protection Barrier & Strength Amplification Totems"
     ],
     "power_level": 85,
-    "stats": {
-      "raw_power": 8.8,
-      "hax": 9.0,
-      "speed": 7.8,
-      "durability": 8.0,
-      "synergy": 9.1,
-      "battle_iq": 9.2
-    },
+    "stats": { "raw_power": 8.8, "hax": 9.0, "speed": 7.8, "durability": 8.0, "synergy": 9.1, "battle_iq": 9.2 },
     "feats": "Cast protective shields that repelled multiple hunter spells simultaneously and commanded an army of high orc elites.",
     "best_function": "Backline magical bombardier, curse weaver, and team-wide buffer.",
     "team_value": "Very High"
@@ -735,6 +573,7 @@
     "role": "Elite Shadow Combatant",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 680000,
     "eligible_roles": ["FIGHTER", "SUPPORT", "ASSASSIN"],
     "description": "Extracted from the vicious S-Rank hunter Hwang Dongsoo. As a shadow general, he combines relentless physical power with unyielding shadow loyalty and bone-shattering shockwaves.",
     "abilities": [
@@ -743,14 +582,7 @@
       "Flank Ambush & Frontline Brawling"
     ],
     "power_level": 84,
-    "stats": {
-      "raw_power": 8.6,
-      "hax": 8.1,
-      "speed": 8.7,
-      "durability": 8.8,
-      "synergy": 9.0,
-      "battle_iq": 8.8
-    },
+    "stats": { "raw_power": 8.6, "hax": 8.1, "speed": 8.7, "durability": 8.8, "synergy": 9.0, "battle_iq": 8.8 },
     "feats": "Smashed through hordes of dungeon monsters and served as vanguard in Jinwoo's international operations.",
     "best_function": "Brutal frontline flanker and tenacious secondary assassin.",
     "team_value": "High"
@@ -762,6 +594,7 @@
     "role": "Demon Noble / Hybrid Combatant",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 420000,
     "eligible_roles": ["MAGE", "SUPPORT", "ASSASSIN"],
     "description": "The nimble noble spearwoman of the Demon Castle. Possesses agile demonic spearmanship, lightning-fast strikes, and demonic aura projection that disorients enemy ranks.",
     "abilities": [
@@ -770,14 +603,7 @@
       "Stealth Reconnaissance & High Agility"
     ],
     "power_level": 80,
-    "stats": {
-      "raw_power": 7.9,
-      "hax": 8.0,
-      "speed": 8.9,
-      "durability": 7.8,
-      "synergy": 8.9,
-      "battle_iq": 8.7
-    },
+    "stats": { "raw_power": 7.9, "hax": 8.0, "speed": 8.9, "durability": 7.8, "synergy": 8.9, "battle_iq": 8.7 },
     "feats": "Guided Sung Jinwoo through the top floors of the Demon Castle and held her ground against high demons.",
     "best_function": "High-mobility support scout, rapid spear assassin, and tactical guide.",
     "team_value": "High"
@@ -789,6 +615,7 @@
     "role": "Ice Elf Boss / Assassin Warlord",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 510000,
     "eligible_roles": ["ASSASSIN"],
     "description": "The lethal chieftain of the Ice Elves in the Red Gate. Wields Baruka's Dagger with blinding assassin speed, stealth manipulation, and freezing frost blade techniques.",
     "abilities": [
@@ -797,14 +624,7 @@
       "Frost Enchantment & Vital Strike Precision"
     ],
     "power_level": 82,
-    "stats": {
-      "raw_power": 8.1,
-      "hax": 8.0,
-      "speed": 9.3,
-      "durability": 7.9,
-      "synergy": 7.9,
-      "battle_iq": 8.8
-    },
+    "stats": { "raw_power": 8.1, "hax": 8.0, "speed": 9.3, "durability": 7.9, "synergy": 7.9, "battle_iq": 8.8 },
     "feats": "Pushed pre-awakened Jinwoo and Igris simultaneously to their limits inside the Red Gate blizzard.",
     "best_function": "Pure stealth assassin, frost-edge infiltrator, and vital-point executioner.",
     "team_value": "High"
@@ -816,6 +636,7 @@
     "role": "High-Level Shadow / Aquatic Warrior",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 530000,
     "eligible_roles": ["MAGE", "TANK"],
     "description": "The serpent-tailed boss of the ocean gate extracted into Jinwoo's shadow legion. Can expand his physical stature to colossal size and wield dual tridents imbued with sea curses.",
     "abilities": [
@@ -824,14 +645,7 @@
       "Thick Scaled Armor & Regenerative Flesh"
     ],
     "power_level": 82,
-    "stats": {
-      "raw_power": 8.4,
-      "hax": 8.1,
-      "speed": 8.1,
-      "durability": 8.9,
-      "synergy": 8.7,
-      "battle_iq": 8.5
-    },
+    "stats": { "raw_power": 8.4, "hax": 8.1, "speed": 8.1, "durability": 8.9, "synergy": 8.7, "battle_iq": 8.5 },
     "feats": "Speared massive gate giants and held back dungeon tidal floods during subterranean incursions.",
     "best_function": "Heavy amphibious tank, trident crowd controller, and magical bruiser.",
     "team_value": "High"
@@ -843,6 +657,7 @@
     "role": "Demon King-level Giant",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 480000,
     "eligible_roles": ["MAGE", "TANK"],
     "description": "A grotesque, towering demon behemoth clad in thick demonic armor wielding a spiked greatclub crackling with demonic lightning and magma shockwaves.",
     "abilities": [
@@ -851,14 +666,7 @@
       "Heavy Bludgeoning Armor"
     ],
     "power_level": 81,
-    "stats": {
-      "raw_power": 8.6,
-      "hax": 7.8,
-      "speed": 7.5,
-      "durability": 8.8,
-      "synergy": 7.8,
-      "battle_iq": 7.9
-    },
+    "stats": { "raw_power": 8.6, "hax": 7.8, "speed": 7.5, "durability": 8.8, "synergy": 7.8, "battle_iq": 7.9 },
     "feats": "Ruled the 50th floor of the Demon Castle with an iron fist, crushing entire legions of lesser demons.",
     "best_function": "Demonic battering tank, earthquake disruptor, and brute force basher.",
     "team_value": "High"
@@ -870,6 +678,7 @@
     "role": "Heavy Armored Shadow Soldier",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 490000,
     "eligible_roles": ["TANK"],
     "description": "The shadow created from the fallen A-Rank hunter Kim Chul. Wields a colossal tower shield and broadaxe, drawing all enemy aggression through a deafening taunt shout.",
     "abilities": [
@@ -878,14 +687,7 @@
       "Shadow Resilience & High Stamina"
     ],
     "power_level": 81,
-    "stats": {
-      "raw_power": 8.2,
-      "hax": 8.0,
-      "speed": 7.7,
-      "durability": 9.1,
-      "synergy": 9.3,
-      "battle_iq": 8.1
-    },
+    "stats": { "raw_power": 8.2, "hax": 8.0, "speed": 7.7, "durability": 9.1, "synergy": 9.3, "battle_iq": 8.1 },
     "feats": "Protected Jinwoo's rear flank countless times by drawing fire from high-ranking dungeon bosses.",
     "best_function": "Dedicated aggro magnet, impenetrable tower shield wall, and frontline protector.",
     "team_value": "High"
@@ -897,6 +699,7 @@
     "role": "Shadow Beast Tank",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 460000,
     "eligible_roles": ["TANK"],
     "description": "The shadow of the mutant alpha Ice Bear from the Red Gate. Enormous muscular frame protected by shadow armor, charging headfirst into enemy ranks like a living freight train.",
     "abilities": [
@@ -905,14 +708,7 @@
       "Vanguard Charge & Shock Absorption"
     ],
     "power_level": 80,
-    "stats": {
-      "raw_power": 8.3,
-      "hax": 7.5,
-      "speed": 8.0,
-      "durability": 9.0,
-      "synergy": 8.9,
-      "battle_iq": 8.0
-    },
+    "stats": { "raw_power": 8.3, "hax": 7.5, "speed": 8.0, "durability": 9.0, "synergy": 8.9, "battle_iq": 8.0 },
     "feats": "Plowed through lines of demon soldiers and broke enemy siege barricades with brute momentum.",
     "best_function": "Disruptive beast vanguard, bullet-sponge tank, and line-breaker.",
     "team_value": "High"
@@ -924,6 +720,7 @@
     "role": "Shadow Sky Mount / Aerial Specialist",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 510000,
     "eligible_roles": ["SUPPORT", "ASSASSIN"],
     "description": "The shadow of the ancient twin-headed wyvern Kaisellin. Provides unrivaled aerial mobility, sky reconnaissance, and diving breath attacks at supersonic speeds.",
     "abilities": [
@@ -932,14 +729,7 @@
       "Rapid Battlefield Transport & Air Superiority"
     ],
     "power_level": 82,
-    "stats": {
-      "raw_power": 8.1,
-      "hax": 8.2,
-      "speed": 9.6,
-      "durability": 8.2,
-      "synergy": 9.4,
-      "battle_iq": 8.6
-    },
+    "stats": { "raw_power": 8.1, "hax": 8.2, "speed": 9.6, "durability": 8.2, "synergy": 9.4, "battle_iq": 8.6 },
     "feats": "Carried Jinwoo across intercontinental battlefields in seconds, evading Monarch artillery.",
     "best_function": "Supreme aerial mobility support, high-speed flank chaser, and sky surveillance.",
     "team_value": "High"
@@ -951,6 +741,7 @@
     "role": "System Architect / Master Mage",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 810000,
     "eligible_roles": ["MAGE"],
     "description": "The enigmatic ancient sorcerer who engineered the System interface connecting mortal hunters to the power of the Shadow Monarch. Wields multi-limbed magic and puppet constructs.",
     "abilities": [
@@ -959,14 +750,7 @@
       "Spatial Barrier & Entity Telekinesis"
     ],
     "power_level": 86,
-    "stats": {
-      "raw_power": 8.8,
-      "hax": 9.5,
-      "speed": 8.6,
-      "durability": 8.4,
-      "synergy": 8.1,
-      "battle_iq": 9.8
-    },
+    "stats": { "raw_power": 8.8, "hax": 9.5, "speed": 8.6, "durability": 8.4, "synergy": 8.1, "battle_iq": 9.8 },
     "feats": "Designed the entire leveling system and fought Jinwoo inside the Cartenon Temple.",
     "best_function": "Master arcane controller, hax spellcaster, and tactical system manipulator.",
     "team_value": "Elite"
@@ -978,6 +762,7 @@
     "role": "Ancient Combat Entity",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 820000,
     "eligible_roles": ["MAGE"],
     "description": "The colossal stone idol sitting atop the throne in the Double Dungeon. Can incinerate S-Rank tier beings with twin laser beams from its glowing eyes and crush invaders with its gargantuan stride.",
     "abilities": [
@@ -986,14 +771,7 @@
       "Rule of the Temple (Forced Obedience Domain)"
     ],
     "power_level": 86,
-    "stats": {
-      "raw_power": 9.2,
-      "hax": 9.1,
-      "speed": 7.4,
-      "durability": 9.4,
-      "synergy": 7.4,
-      "battle_iq": 8.3
-    },
+    "stats": { "raw_power": 9.2, "hax": 9.1, "speed": 7.4, "durability": 9.4, "synergy": 7.4, "battle_iq": 8.3 },
     "feats": "Instantly wiped out high-level Korean hunter raid members in the first chapter's Cartenon Temple.",
     "best_function": "Devastating ocular laser artillery and immovable monolithic fortress.",
     "team_value": "Very High"
@@ -1005,6 +783,7 @@
     "role": "B-Rank Hunter / Master Assassin",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 380000,
     "eligible_roles": ["ASSASSIN"],
     "description": "A lethal inspector from the Korean Hunter Association whose assassination prowess far exceeded his official rank. Specializes in instant stealth cloaking and throat-slitting dagger arts.",
     "abilities": [
@@ -1013,14 +792,7 @@
       "Preternatural Bloodlust & Lethal Vital Targeting"
     ],
     "power_level": 80,
-    "stats": {
-      "raw_power": 7.8,
-      "hax": 8.2,
-      "speed": 9.2,
-      "durability": 7.4,
-      "synergy": 7.8,
-      "battle_iq": 9.0
-    },
+    "stats": { "raw_power": 7.8, "hax": 8.2, "speed": 9.2, "durability": 7.4, "synergy": 7.8, "battle_iq": 9.0 },
     "feats": "Assassinated multiple hunters in an instant without leaving trace or sound.",
     "best_function": "Stealth infiltrator, backline disruptor, and sudden assassination executioner.",
     "team_value": "High"
@@ -1032,6 +804,7 @@
     "role": "A-Rank Hunter / Combat Inspector",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 370000,
     "eligible_roles": ["SUPPORT"],
     "description": "The dependable Chief Inspector of the Korean Hunter Association Surveillance Team. Combines solid martial arts, iron discipline, organizational intelligence, and calm tactical leadership.",
     "abilities": [
@@ -1040,14 +813,7 @@
       "Command Coordination & Morale Stabilizer"
     ],
     "power_level": 79,
-    "stats": {
-      "raw_power": 7.9,
-      "hax": 7.5,
-      "speed": 8.4,
-      "durability": 8.1,
-      "synergy": 9.4,
-      "battle_iq": 9.3
-    },
+    "stats": { "raw_power": 7.9, "hax": 7.5, "speed": 8.4, "durability": 8.1, "synergy": 9.4, "battle_iq": 9.3 },
     "feats": "Successfully coordinated national raid teams and assumed presidency of the Hunter Association.",
     "best_function": "Strategic commander, team morale pillar, and reliable frontline coordinator.",
     "team_value": "High"
@@ -1059,6 +825,7 @@
     "role": "A-Rank Mage / Sensory Support",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 310000,
     "eligible_roles": ["SUPPORT"],
     "description": "An intuitive elite mage from the White Tiger Guild possessing keen danger sense, elemental magic projectiles, and acute mana radar.",
     "abilities": [
@@ -1067,14 +834,7 @@
       "Allied Resource Conservation Guide"
     ],
     "power_level": 76,
-    "stats": {
-      "raw_power": 7.5,
-      "hax": 7.7,
-      "speed": 7.8,
-      "durability": 7.4,
-      "synergy": 9.0,
-      "battle_iq": 8.8
-    },
+    "stats": { "raw_power": 7.5, "hax": 7.7, "speed": 7.8, "durability": 7.4, "synergy": 9.0, "battle_iq": 8.8 },
     "feats": "Correctly identified Jinwoo's true nature during the Red Gate incident, surviving against all odds.",
     "best_function": "Sensory reconnaissance, ambush prevention, and tactical utility support.",
     "team_value": "High"
@@ -1086,6 +846,7 @@
     "role": "D-Rank Hunter / Guild Vice Master",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 300000,
     "eligible_roles": ["SUPPORT"],
     "description": "The fiercely loyal Vice Master of the Ahjin Guild. Equipped with ultra-expensive legendary artifact gear, he provides flawless raid logistics, morale boosting, and unbreakable dedication.",
     "abilities": [
@@ -1094,14 +855,7 @@
       "Unflinching Loyalty & Allied Morale Boost"
     ],
     "power_level": 75,
-    "stats": {
-      "raw_power": 7.1,
-      "hax": 7.4,
-      "speed": 7.4,
-      "durability": 8.4,
-      "synergy": 9.7,
-      "battle_iq": 8.6
-    },
+    "stats": { "raw_power": 7.1, "hax": 7.4, "speed": 7.4, "durability": 8.4, "synergy": 9.7, "battle_iq": 8.6 },
     "feats": "Endured brutal torture by Hwang Dongsoo without betraying Sung Jinwoo, demonstrating legendary fortitude.",
     "best_function": "Unbreakable morale support, high-end gear defense, and perfect team cohesion catalyst.",
     "team_value": "High"
@@ -1113,6 +867,7 @@
     "role": "S-Rank Healer / Divine Enhancer",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 750000,
     "eligible_roles": ["HEALER", "SUPPORT"],
     "description": "South Korea's premier healing specialist and retired S-Rank legend. Possesses divine recovery magic capable of reattaching severed limbs and boosting allied combat stats exponentially.",
     "abilities": [
@@ -1121,14 +876,7 @@
       "Camouflage & Sensory Concealment"
     ],
     "power_level": 86,
-    "stats": {
-      "raw_power": 7.4,
-      "hax": 9.4,
-      "speed": 8.3,
-      "durability": 8.0,
-      "synergy": 9.9,
-      "battle_iq": 9.5
-    },
+    "stats": { "raw_power": 7.4, "hax": 9.4, "speed": 8.3, "durability": 8.0, "synergy": 9.9, "battle_iq": 9.5 },
     "feats": "Healed national strike teams on Jeju Island; even as a temporary shadow, his blessing saved Cha Hae-In's life.",
     "best_function": "Supreme pure healer, unmatched stat booster, and life-saving clutch support.",
     "team_value": "Elite"
@@ -1140,6 +888,7 @@
     "role": "B-Rank Healer / Recovery Specialist",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 340000,
     "eligible_roles": ["HEALER", "SUPPORT"],
     "description": "The kind-hearted healer who repeatedly kept Sung Jinwoo alive in his weakest days. Specializes in rapid wound closure, fatigue removal, and soothing restoration wards.",
     "abilities": [
@@ -1148,14 +897,7 @@
       "Calming Aura & Mental Fortitude Aid"
     ],
     "power_level": 78,
-    "stats": {
-      "raw_power": 6.8,
-      "hax": 8.6,
-      "speed": 7.5,
-      "durability": 7.4,
-      "synergy": 9.3,
-      "battle_iq": 8.5
-    },
+    "stats": { "raw_power": 6.8, "hax": 8.6, "speed": 7.5, "durability": 7.4, "synergy": 9.3, "battle_iq": 8.5 },
     "feats": "Survived the horrors of the Cartenon Temple through steady healing discipline and quick triage.",
     "best_function": "Reliable mid-battle triage healer, stamina rejuvenator, and calm support.",
     "team_value": "High"
@@ -1167,6 +909,7 @@
     "role": "S-Rank Healer / Draw Sword Guild",
     "tier": "A+ — TOP S-RANK",
     "tier_category": "A+",
+    "power_number": 680000,
     "eligible_roles": ["HEALER"],
     "description": "One of Japan's most celebrated S-Rank hunters and chief healer of the Draw Sword Guild. Specializes in large-radius healing barriers and instantaneous high-level mana restoration.",
     "abilities": [
@@ -1175,14 +918,7 @@
       "Purification Wave & Status Cleansing"
     ],
     "power_level": 84,
-    "stats": {
-      "raw_power": 7.2,
-      "hax": 9.1,
-      "speed": 8.1,
-      "durability": 7.8,
-      "synergy": 9.5,
-      "battle_iq": 9.1
-    },
+    "stats": { "raw_power": 7.2, "hax": 9.1, "speed": 8.1, "durability": 7.8, "synergy": 9.5, "battle_iq": 9.1 },
     "feats": "Provided vital wide-area healing support to the 20+ S-Rank hunters during the Jeju island raid.",
     "best_function": "High-level raid healer, AoE restorative anchor, and status-cleanser.",
     "team_value": "Very High"
@@ -1194,6 +930,7 @@
     "role": "A-Rank Healer / Guild Specialist",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 330000,
     "eligible_roles": ["HEALER"],
     "description": "An established Korean A-Rank healing specialist known for swift emergency triage, durable vitality wards, and consistent support under extreme pressure.",
     "abilities": [
@@ -1202,14 +939,7 @@
       "Allied Armor Reinforcement Blessing"
     ],
     "power_level": 77,
-    "stats": {
-      "raw_power": 6.9,
-      "hax": 8.3,
-      "speed": 7.6,
-      "durability": 7.5,
-      "synergy": 9.0,
-      "battle_iq": 8.6
-    },
+    "stats": { "raw_power": 6.9, "hax": 8.3, "speed": 7.6, "durability": 7.5, "synergy": 9.0, "battle_iq": 8.6 },
     "feats": "Supported multiple high-tier A-Rank dungeon raids with zero party casualties.",
     "best_function": "Dependable emergency healer and front-line stabilizer.",
     "team_value": "High"
@@ -1221,6 +951,7 @@
     "role": "High-Level Healer & Support",
     "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
     "tier_category": "A",
+    "power_number": 320000,
     "eligible_roles": ["HEALER"],
     "description": "The dedicated healing and protective specialist for the prestigious Knight Guild, proficient in rapid barrier deployment and continuous regenerative charms.",
     "abilities": [
@@ -1229,14 +960,7 @@
       "Swift Recovery Chant"
     ],
     "power_level": 76,
-    "stats": {
-      "raw_power": 6.7,
-      "hax": 8.2,
-      "speed": 7.5,
-      "durability": 7.4,
-      "synergy": 8.9,
-      "battle_iq": 8.5
-    },
+    "stats": { "raw_power": 6.7, "hax": 8.2, "speed": 7.5, "durability": 7.4, "synergy": 8.9, "battle_iq": 8.5 },
     "feats": "Kept the Knight Guild vanguard alive through punishing multi-wave monster gate assaults.",
     "best_function": "Sustained recovery healer and protective shield assistant.",
     "team_value": "High"

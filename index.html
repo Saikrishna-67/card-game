@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solo Leveling — Random Card Team Building Game</title>
+    <title>Solo Leveling — Multiplayer Squad Battle Arena</title>
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,7 +11,7 @@
     <style>
         :root {
             --bg-dark: #070913;
-            --card-bg: rgba(14, 18, 36, 0.88);
+            --card-bg: rgba(14, 18, 36, 0.92);
             --card-border: rgba(43, 98, 255, 0.4);
             --neon-blue: #00d2ff;
             --monarch-purple: #9d4edd;
@@ -21,6 +21,10 @@
             --green: #06d6a0;
             --text-main: #f0f4f8;
             --text-muted: #8b9bb4;
+            --p1-color: #00d2ff;
+            --p2-color: #ff0054;
+            --p3-color: #ffd166;
+            --p4-color: #06d6a0;
         }
 
         * {
@@ -32,8 +36,8 @@
         body {
             background-color: var(--bg-dark);
             background-image: 
-                radial-gradient(circle at 50% 0%, rgba(58, 134, 255, 0.18) 0%, transparent 60%),
-                radial-gradient(circle at 10% 90%, rgba(157, 78, 221, 0.12) 0%, transparent 45%),
+                radial-gradient(circle at 50% 0%, rgba(58, 134, 255, 0.2) 0%, transparent 60%),
+                radial-gradient(circle at 90% 90%, rgba(157, 78, 221, 0.15) 0%, transparent 50%),
                 linear-gradient(180deg, #05070d 0%, #0a0e1c 100%);
             color: var(--text-main);
             font-family: 'Rajdhani', 'Inter', sans-serif;
@@ -43,7 +47,6 @@
             overflow-x: hidden;
         }
 
-        /* Particle Canvas */
         #particleCanvas {
             position: fixed;
             top: 0;
@@ -54,18 +57,19 @@
             z-index: 0;
         }
 
-        /* Header */
         header {
             position: relative;
             z-index: 10;
             text-align: center;
-            padding: 24px 16px 14px;
+            padding: 20px 16px 12px;
             background: linear-gradient(180deg, rgba(10, 14, 28, 0.95) 0%, rgba(10, 14, 28, 0) 100%);
-            border-bottom: 1px solid rgba(0, 210, 255, 0.18);
+            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .system-badge {
-            display: inline-block;
             font-family: 'Rajdhani', sans-serif;
             font-weight: 700;
             font-size: 0.85rem;
@@ -76,166 +80,157 @@
             background: rgba(0, 210, 255, 0.1);
             border: 1px solid var(--neon-blue);
             border-radius: 4px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             box-shadow: 0 0 15px rgba(0, 210, 255, 0.3);
         }
 
         h1 {
             font-family: 'Cinzel', serif;
-            font-size: 2.5rem;
+            font-size: 2.3rem;
             font-weight: 900;
             letter-spacing: 2px;
-            background: linear-gradient(90deg, #ffffff 0%, #00d2ff 50%, #9d4edd 100%);
+            background: linear-gradient(90deg, #ffffff 0%, #00d2ff 40%, #ffd166 75%, #9d4edd 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 30px rgba(0, 210, 255, 0.4);
-            margin-bottom: 4px;
         }
 
-        .subtitle {
+        .mode-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .player-count-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             color: var(--text-muted);
-            font-size: 1.05rem;
-            font-weight: 500;
-            letter-spacing: 1px;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 6px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        /* Main Game Layout */
+        .player-count-btn.active {
+            background: linear-gradient(135deg, #00d2ff, #3a86ff);
+            color: #05070d;
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.5);
+        }
+
+        /* Turn Banner */
+        .turn-banner {
+            position: relative;
+            z-index: 10;
+            background: rgba(14, 18, 36, 0.95);
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            max-width: 1400px;
+            margin: 12px auto 0;
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: calc(100% - 40px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .turn-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .player-tag {
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .tag-p1 { background: rgba(0, 210, 255, 0.2); color: var(--p1-color); border: 1px solid var(--p1-color); }
+        .tag-p2 { background: rgba(255, 0, 84, 0.2); color: var(--p2-color); border: 1px solid var(--p2-color); }
+        .tag-p3 { background: rgba(255, 209, 102, 0.2); color: var(--p3-color); border: 1px solid var(--p3-color); }
+        .tag-p4 { background: rgba(6, 214, 160, 0.2); color: var(--p4-color); border: 1px solid var(--p4-color); }
+
+        /* Game Layout */
         .game-layout {
             position: relative;
             z-index: 10;
-            max-width: 1400px;
+            max-width: 1450px;
             margin: 0 auto;
             padding: 20px;
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 380px;
             gap: 24px;
             flex: 1;
             width: 100%;
         }
 
-        @media (max-width: 1050px) {
+        @media (max-width: 1100px) {
             .game-layout {
                 grid-template-columns: 1fr;
             }
         }
 
-        /* Left Column: Team Slots & Deck Controls */
-        .team-section {
+        /* Player Team Tabs */
+        .team-tabs {
             display: flex;
-            flex-direction: column;
-            gap: 20px;
+            gap: 10px;
+            margin-bottom: 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding-bottom: 10px;
         }
 
-        /* Control Panel */
-        .controls-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 14px;
-            padding: 16px 22px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            backdrop-filter: blur(14px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45);
-        }
-
-        .draw-instruction {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .key-badge {
-            background: linear-gradient(135deg, #1e293b, #0f172a);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            font-family: monospace;
-            font-size: 1.5rem;
-            font-weight: bold;
-            padding: 4px 16px;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 210, 255, 0.4);
-            animation: pulseGlow 2s infinite ease-in-out;
-        }
-
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 10px rgba(0, 210, 255, 0.4); }
-            50% { box-shadow: 0 0 20px rgba(0, 210, 255, 0.8); }
-        }
-
-        .deck-stats {
-            display: flex;
-            gap: 24px;
-            font-size: 1rem;
-            font-weight: 600;
-        }
-
-        .deck-stat-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .deck-stat-item span:first-child {
+        .team-tab-btn {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.15);
             color: var(--text-muted);
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-
-        .deck-stat-item span:last-child {
-            color: var(--neon-blue);
-            font-size: 1.25rem;
-            font-family: 'Cinzel', serif;
-        }
-
-        .btn-action {
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 12px 26px;
             font-family: 'Rajdhani', sans-serif;
-            font-size: 1.15rem;
             font-weight: 700;
-            border-radius: 10px;
+            font-size: 1.05rem;
+            padding: 8px 20px;
+            border-radius: 8px;
             cursor: pointer;
-            letter-spacing: 1px;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
             display: flex;
             align-items: center;
             gap: 8px;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
         }
 
-        .btn-action:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6);
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-        }
-
-        .btn-action:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            transform: none;
+        .team-tab-btn.active {
+            background: rgba(0, 210, 255, 0.15);
+            border-color: var(--neon-blue);
+            color: #fff;
+            box-shadow: 0 0 12px rgba(0, 210, 255, 0.3);
         }
 
         /* 7 Team Slots Grid */
         .positions-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 16px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 14px;
         }
 
         .position-slot {
             background: var(--card-bg);
             border: 1px dashed var(--card-border);
             border-radius: 12px;
-            padding: 16px;
-            min-height: 180px;
+            padding: 14px;
+            min-height: 170px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             transition: all 0.3s ease;
-            position: relative;
             backdrop-filter: blur(10px);
         }
 
@@ -254,72 +249,44 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
             border-bottom: 1px solid rgba(255, 255, 255, 0.08);
             padding-bottom: 6px;
+            margin-bottom: 6px;
         }
 
         .slot-title {
-            font-size: 1.05rem;
+            font-size: 1rem;
             font-weight: 700;
             letter-spacing: 1px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
 
         .slot-status {
-            font-size: 0.75rem;
-            padding: 2px 8px;
+            font-size: 0.7rem;
+            padding: 2px 6px;
             border-radius: 4px;
             text-transform: uppercase;
             font-weight: 700;
         }
 
-        .status-empty {
-            background: rgba(255, 255, 255, 0.05);
-            color: var(--text-muted);
-        }
-
-        .status-filled {
-            background: rgba(6, 214, 160, 0.2);
-            color: var(--green);
-            border: 1px solid rgba(6, 214, 160, 0.4);
-        }
-
-        .slot-card-content {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            flex: 1;
-        }
-
-        .empty-placeholder {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 90px;
-            color: var(--text-muted);
-            font-size: 0.88rem;
-            text-align: center;
-        }
+        .status-empty { background: rgba(255, 255, 255, 0.05); color: var(--text-muted); }
+        .status-filled { background: rgba(6, 214, 160, 0.2); color: var(--green); border: 1px solid rgba(6, 214, 160, 0.4); }
 
         .card-name-slot {
             font-family: 'Cinzel', serif;
-            font-size: 1.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: #ffffff;
         }
 
         .card-tier-badge {
             display: inline-block;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 800;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 4px;
             letter-spacing: 1px;
             width: fit-content;
+            margin: 2px 0;
         }
 
         .tier-sss { background: linear-gradient(90deg, #ff0054, #7928ca); color: #fff; box-shadow: 0 0 10px rgba(255, 0, 84, 0.4); }
@@ -328,36 +295,38 @@
         .tier-a-plus { background: #3a86ff; color: #fff; }
         .tier-a { background: #4a5568; color: #fff; }
 
-        .slot-abilities-list {
+        .power-score-tag {
             font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--gold);
+        }
+
+        .empty-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 70px;
             color: var(--text-muted);
-            list-style: none;
-            line-height: 1.4;
-            margin-top: 4px;
+            font-size: 0.85rem;
         }
 
-        .slot-abilities-list li::before {
-            content: "◆ ";
-            color: var(--neon-blue);
-        }
-
-        /* Right Column: Drawn Card View */
+        /* Right Side: Drawn Card Drawer */
         .drawer-section {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
 
         .drawn-card-container {
             background: var(--card-bg);
             border: 1px solid var(--neon-blue);
             border-radius: 16px;
-            padding: 24px;
+            padding: 22px;
             backdrop-filter: blur(16px);
             box-shadow: 0 10px 40px rgba(0, 210, 255, 0.25);
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
             transition: all 0.3s ease;
         }
 
@@ -366,94 +335,56 @@
             box-shadow: none;
             align-items: center;
             justify-content: center;
-            min-height: 480px;
+            min-height: 440px;
             text-align: center;
-        }
-
-        .drawn-card-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            border-bottom: 1px solid rgba(0, 210, 255, 0.2);
-            padding-bottom: 10px;
         }
 
         .drawn-name {
             font-family: 'Cinzel', serif;
-            font-size: 1.7rem;
+            font-size: 1.6rem;
             font-weight: 800;
             color: #fff;
-            text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
         }
 
         .drawn-title {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             color: var(--neon-blue);
             font-weight: 600;
         }
 
         .drawn-desc {
-            font-size: 0.92rem;
-            line-height: 1.5;
+            font-size: 0.88rem;
+            line-height: 1.45;
             color: #cbd5e1;
             font-family: 'Inter', sans-serif;
             background: rgba(0, 0, 0, 0.25);
-            padding: 10px;
+            padding: 8px 10px;
             border-radius: 8px;
             border-left: 3px solid var(--neon-blue);
         }
 
         .section-title {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             text-transform: uppercase;
             letter-spacing: 1.5px;
             color: var(--neon-blue);
             font-weight: 700;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .drawn-abilities {
             list-style: none;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            font-size: 0.88rem;
+            gap: 4px;
+            font-size: 0.85rem;
             font-family: 'Inter', sans-serif;
         }
 
         .drawn-abilities li {
             background: rgba(255, 255, 255, 0.04);
-            padding: 5px 8px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .drawn-feats {
-            font-size: 0.85rem;
-            color: #94a3b8;
-            line-height: 1.4;
-            font-family: 'Inter', sans-serif;
-        }
-
-        .drawn-team-func {
-            font-size: 0.88rem;
-            font-weight: 600;
-            color: var(--gold);
-            background: rgba(255, 209, 102, 0.1);
-            padding: 8px 10px;
-            border-radius: 6px;
-            border: 1px solid rgba(255, 209, 102, 0.3);
-        }
-
-        .card-decision-box {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 4px;
-            padding-top: 10px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 4px 8px;
+            border-radius: 4px;
         }
 
         .slot-selector-grid {
@@ -466,11 +397,11 @@
             background: rgba(0, 210, 255, 0.08);
             border: 1px solid rgba(0, 210, 255, 0.3);
             color: #fff;
-            padding: 8px 12px;
+            padding: 7px 10px;
             border-radius: 6px;
             font-family: 'Rajdhani', sans-serif;
             font-weight: 700;
-            font-size: 0.95rem;
+            font-size: 0.92rem;
             text-align: left;
             cursor: pointer;
             display: flex;
@@ -486,7 +417,7 @@
         }
 
         .rec-tag {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--gold);
             background: rgba(255, 209, 102, 0.15);
             padding: 2px 6px;
@@ -504,6 +435,7 @@
             font-size: 0.95rem;
             cursor: pointer;
             transition: all 0.2s;
+            margin-top: 6px;
         }
 
         .btn-discard:hover {
@@ -511,14 +443,44 @@
             color: #fff;
         }
 
-        /* Final Team Modal */
-        .modal-overlay {
+        .btn-action-main {
+            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 12px 24px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            letter-spacing: 1px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            width: 100%;
+        }
+
+        .btn-action-main:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(124, 58, 237, 0.6);
+        }
+
+        .btn-action-main:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        /* Battle Arena Modal */
+        .arena-modal-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: rgba(5, 7, 13, 0.9);
+            background: rgba(5, 7, 13, 0.95);
             backdrop-filter: blur(20px);
             z-index: 100;
             display: none;
@@ -527,137 +489,134 @@
             padding: 20px;
         }
 
-        .modal-overlay.active {
+        .arena-modal-overlay.active {
             display: flex;
         }
 
-        .results-box {
+        .arena-box {
             background: #0d1224;
             border: 2px solid var(--neon-blue);
             border-radius: 20px;
-            max-width: 850px;
+            max-width: 1000px;
             width: 100%;
-            max-height: 90vh;
+            max-height: 92vh;
             overflow-y: auto;
-            padding: 36px;
+            padding: 30px;
             box-shadow: 0 0 60px rgba(0, 210, 255, 0.4);
             display: flex;
             flex-direction: column;
             gap: 20px;
-            animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            animation: arenaPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        @keyframes modalPop {
+        @keyframes arenaPop {
             0% { transform: scale(0.8); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
 
-        .results-header {
+        .arena-header {
             text-align: center;
             border-bottom: 1px solid rgba(0, 210, 255, 0.3);
-            padding-bottom: 16px;
+            padding-bottom: 14px;
         }
 
-        .results-score-big {
+        .arena-title {
             font-family: 'Cinzel', serif;
-            font-size: 3.8rem;
+            font-size: 2.2rem;
             font-weight: 900;
-            color: var(--neon-blue);
-            text-shadow: 0 0 30px rgba(0, 210, 255, 0.6);
-            margin: 8px 0;
+            background: linear-gradient(90deg, #ff0054, #ffd166, #00d2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .verdict-tag {
-            display: inline-block;
-            font-size: 1.3rem;
-            font-weight: 900;
-            letter-spacing: 2px;
-            padding: 6px 24px;
-            border-radius: 8px;
-        }
-
-        .verdict-win {
-            background: linear-gradient(90deg, #06d6a0, #3a86ff);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(6, 214, 160, 0.4);
-        }
-
-        .verdict-close {
-            background: linear-gradient(90deg, #ffd166, #ff9f1c);
-            color: #000;
-            box-shadow: 0 0 20px rgba(255, 209, 102, 0.4);
-        }
-
-        .verdict-loss {
-            background: linear-gradient(90deg, #ff0054, #7928ca);
-            color: #fff;
-            box-shadow: 0 0 20px rgba(255, 0, 84, 0.4);
-        }
-
-        .stats-bars-grid {
+        .versus-display {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 14px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin: 10px 0;
         }
 
-        @media (max-width: 600px) {
-            .stats-bars-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .stat-bar-item {
+        .team-battle-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            text-align: center;
+            gap: 6px;
+            transition: all 0.3s;
         }
 
-        .stat-bar-label {
+        .team-battle-card.winner-glow {
+            border-color: var(--gold);
+            box-shadow: 0 0 25px rgba(255, 209, 102, 0.5);
+            background: rgba(255, 209, 102, 0.08);
+        }
+
+        .battle-score-num {
+            font-family: 'Cinzel', serif;
+            font-size: 2.2rem;
+            font-weight: 900;
+            color: var(--gold);
+        }
+
+        .battle-logs-container {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 16px;
+            max-height: 260px;
+            overflow-y: auto;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.9rem;
+            line-height: 1.6;
             display: flex;
-            justify-content: space-between;
-            font-size: 0.92rem;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .log-entry {
+            border-left: 3px solid var(--neon-blue);
+            padding-left: 10px;
+        }
+
+        .log-entry.crit {
+            border-left-color: var(--crimson);
+            color: #ffd166;
             font-weight: 600;
         }
 
-        .stat-bar-track {
-            height: 8px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .stat-bar-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--shadow-blue), var(--neon-blue));
-            border-radius: 4px;
-            transition: width 1s ease-out;
-        }
-
-        .synergy-notes-box {
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(0, 210, 255, 0.2);
-            border-radius: 10px;
-            padding: 14px;
+        .champion-podium {
+            text-align: center;
+            background: linear-gradient(180deg, rgba(255, 209, 102, 0.15) 0%, rgba(255, 209, 102, 0.02) 100%);
+            border: 2px solid var(--gold);
+            border-radius: 14px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 0 30px rgba(255, 209, 102, 0.3);
         }
 
-        .btn-restart {
+        .btn-restart-arena {
             background: linear-gradient(135deg, #00d2ff, #3a86ff);
             color: #05070d;
-            border: none;
             font-family: 'Rajdhani', sans-serif;
             font-size: 1.2rem;
             font-weight: 800;
             padding: 14px;
+            border: none;
             border-radius: 10px;
             cursor: pointer;
             letter-spacing: 2px;
+            width: 100%;
             transition: all 0.2s;
         }
 
-        .btn-restart:hover {
+        .btn-restart-arena:hover {
             transform: scale(1.02);
             box-shadow: 0 0 25px rgba(0, 210, 255, 0.6);
         }
@@ -667,87 +626,88 @@
     <canvas id="particleCanvas"></canvas>
 
     <header>
-        <div class="system-badge">System Awakening • Online Edition</div>
+        <div class="system-badge">System Awakening • Multiplayer Battle Arena</div>
         <h1>SOLO LEVELING</h1>
-        <div class="subtitle">Random Card Team Building Battle Game</div>
+        <div class="subtitle">Multiplayer Squad Draft & Sovereign Tournament</div>
+        
+        <div class="mode-bar">
+            <span style="font-weight: 700; color: var(--text-muted); font-size: 0.95rem;">SELECT PLAYERS:</span>
+            <button class="player-count-btn active" onclick="setPlayerCount(2)">👥 2 Players (1v1)</button>
+            <button class="player-count-btn" onclick="setPlayerCount(3)">⚔️ 3 Players</button>
+            <button class="player-count-btn" onclick="setPlayerCount(4)">👑 4 Players (Tournament)</button>
+        </div>
     </header>
 
+    <!-- Turn Banner -->
+    <div class="turn-banner" id="turnBanner">
+        <div class="turn-indicator">
+            <span>Current Turn:</span>
+            <span id="currentTurnTag" class="player-tag tag-p1">Player 1</span>
+        </div>
+        <div style="font-size: 0.95rem; color: var(--text-muted);">
+            Deck Pool: <strong id="poolCount" style="color: var(--neon-blue);">34</strong> cards left
+        </div>
+    </div>
+
     <div class="game-layout">
-        <!-- Left Side: Squad Slots -->
+        <!-- Left Side: Squad Slots with Player Switcher Tabs -->
         <div class="team-section">
-            <div class="controls-card">
-                <div class="draw-instruction">
-                    <span class="key-badge">.</span>
-                    <div>
-                        <div style="font-weight: 700; font-size: 1.1rem;">Press Period <span style="color:var(--neon-blue)">[ . ]</span> to Draw</div>
-                        <div style="font-size: 0.85rem; color: var(--text-muted)">Draw 1 random unused canon character card</div>
-                    </div>
-                </div>
-
-                <div class="deck-stats">
-                    <div class="deck-stat-item">
-                        <span>Remaining Deck</span>
-                        <span id="deckCount">34</span>
-                    </div>
-                    <div class="deck-stat-item">
-                        <span>Squad Filled</span>
-                        <span id="squadFilledCount">0 / 7</span>
-                    </div>
-                </div>
-
-                <button id="btnDraw" class="btn-action" onclick="handleDrawClick()">
-                    <span>🎴 DRAW CARD</span>
-                </button>
+            <div class="team-tabs" id="teamTabs">
+                <!-- Injected tabs -->
             </div>
 
-            <!-- 7 Positions Grid -->
+            <!-- 7 Positions Grid for viewed player -->
             <div class="positions-grid" id="positionsGrid">
-                <!-- Injected via JavaScript -->
+                <!-- Injected via JS -->
             </div>
         </div>
 
-        <!-- Right Side: Drawn Card Inspection & Actions -->
+        <!-- Right Side: Active Card Draw & Assignment -->
         <div class="drawer-section">
+            <div class="controls-card" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 14px; padding: 14px;">
+                <button id="btnDraw" class="btn-action-main" onclick="handleDrawClick()">
+                    <span>🎴 DRAW CARD [ . ]</span>
+                </button>
+            </div>
+
             <div id="drawnCardContainer" class="drawn-card-container empty-draw">
-                <div style="font-size: 3rem; margin-bottom: 10px;">🎴</div>
-                <h3 style="font-family: 'Cinzel', serif; margin-bottom: 8px;">No Active Card</h3>
-                <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 260px;">
-                    Press the <strong>[ . ]</strong> key on your keyboard or click <strong>DRAW CARD</strong> to summon a fighter.
+                <div style="font-size: 3rem; margin-bottom: 8px;">🎴</div>
+                <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">No Active Card</h3>
+                <p style="color: var(--text-muted); font-size: 0.88rem; max-width: 250px;">
+                    <strong id="activePlayerTurnName">Player 1</strong>, press <strong>[ . ]</strong> or click <strong>DRAW CARD</strong> to draft a fighter.
                 </p>
             </div>
         </div>
     </div>
 
-    <!-- Final Evaluation Modal -->
-    <div class="modal-overlay" id="resultsModal">
-        <div class="results-box">
-            <div class="results-header">
-                <div class="system-badge">System Assessment Complete</div>
-                <h2 style="font-family:'Cinzel', serif; font-size: 2rem;">FINAL TEAM EVALUATION</h2>
-                <div class="results-score-big" id="finalScoreVal">00.0/100</div>
-                <div class="verdict-tag" id="verdictBadge">VERDICT</div>
+    <!-- Sovereign Arena Battle Modal -->
+    <div class="arena-modal-overlay" id="arenaModal">
+        <div class="arena-box">
+            <div class="arena-header">
+                <div class="system-badge">Sovereign Dimensional Arena</div>
+                <div class="arena-title">TOURNAMENT BATTLE SIMULATION</div>
+                <div style="color: var(--text-muted); font-size: 0.95rem;">All squads filled! Simulating round-by-round combat based on canon power scaling...</div>
             </div>
 
-            <div class="stats-bars-grid" id="statsBreakdownContainer">
-                <!-- Stat progress bars injected here -->
+            <div class="versus-display" id="versusDisplay">
+                <!-- Team summary cards injected -->
             </div>
 
-            <div class="synergy-notes-box">
-                <div class="section-title">Synergy & Battle Dynamics</div>
-                <div id="synergyNotesList" style="font-size: 0.95rem; line-height: 1.5; color: #e2e8f0;"></div>
+            <div class="section-title">Battle Clashes & Skill Activations</div>
+            <div class="battle-logs-container" id="battleLogs">
+                <!-- Battle log steps -->
             </div>
 
-            <div class="synergy-notes-box">
-                <div class="section-title" style="color: var(--crimson);">⚠️ Hardest Enemy Matchup</div>
-                <div id="hardestMatchupText" style="font-size: 0.95rem; line-height: 1.4; color: #cbd5e1;"></div>
+            <div class="champion-podium" id="championPodium">
+                <!-- Champion details -->
             </div>
 
-            <button class="btn-restart" id="btnRestart" onclick="resetGame()">🔄 ASSEMBLE NEW TEAM</button>
+            <button class="btn-restart-arena" onclick="resetMultiplayerGame()">🔄 ASSEMBLE NEW TOURNAMENT</button>
         </div>
     </div>
 
     <script>
-        // Canon Characters Database (Embedded for instant GitHub Pages support & offline play)
+        // Canon Characters Database with Official Scaling
         const CARDS_DATABASE = [
           {
             "id": "sung_jinwoo",
@@ -756,38 +716,28 @@
             "role": "Shadow Monarch / All-Rounder",
             "tier": "SSS — GOD TIER",
             "tier_category": "SSS",
+            "power_number": 10000000,
             "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
-            "description": "The complete incarnation of Death and the absolute ruler of the Shadow Army. Wields infinite mana, sovereign authority over souls, and physical capabilities that transcend mortal dimensions.",
-            "abilities": [
-              "Shadow Extraction & Monarch's Domain",
-              "Ruler's Authority (Telekinesis) & Dragon's Fear",
-              "Stealth, Shadow Exchange & Complete Regeneration"
-            ],
-            "power_level": 100,
+            "description": "The complete incarnation of Death and absolute ruler of the Shadow Army. Wields infinite mana, sovereign authority over souls, and physical capabilities that transcend mortal dimensions.",
+            "abilities": ["Shadow Extraction & Monarch's Domain", "Ruler's Authority & Dragon's Fear", "Stealth & Complete Regeneration"],
             "stats": { "raw_power": 10.0, "hax": 10.0, "speed": 10.0, "durability": 10.0, "synergy": 10.0, "battle_iq": 10.0 },
-            "feats": "Defeated Antares (Monarch of Destruction), wiped out Monarch armies alone, extracted millions of shadows into his personal dimension.",
-            "best_function": "Ultimate commander, devastating damage dealer, and absolute battlefield controller.",
-            "team_value": "God Tier"
+            "feats": "Defeated Antares (Monarch of Destruction), eradicated Monarch legions single-handedly, extracted millions of shadows.",
+            "best_function": "Ultimate commander, devastating damage dealer, and absolute battlefield controller."
           },
           {
             "id": "ashborn",
             "name": "Ashborn",
-            "title": "The Greatest Fragment of Brilliant Light / Original Shadow Monarch",
+            "title": "The Greatest Fragment of Light / Original Shadow Monarch",
             "role": "Original Shadow Monarch",
             "tier": "SSS — GOD TIER",
             "tier_category": "SSS",
+            "power_number": 9900000,
             "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
-            "description": "The primordial Ruler who inherited the power of Death from the Absolute Being. Possesses unfathomable cosmic power and commands the ancestral core of the Shadow Army.",
-            "abilities": [
-              "Primordial Power of Death & Soul Subjugation",
-              "Ruler's Authority & Absolute Mana Manipulation",
-              "Astral Projection & Eternal Shadow Armies"
-            ],
-            "power_level": 100,
+            "description": "The primordial Ruler who inherited the power of Death from the Absolute Being. Possesses cosmic power and commands the ancestral core of the Shadow Army.",
+            "abilities": ["Primordial Power of Death & Soul Subjugation", "Ruler's Authority & Mana Manipulation", "Astral Projection & Eternal Shadow Armies"],
             "stats": { "raw_power": 10.0, "hax": 10.0, "speed": 9.8, "durability": 10.0, "synergy": 9.9, "battle_iq": 10.0 },
             "feats": "Slaughtered both Ruler and Monarch legions simultaneously in the ancient primordial war.",
-            "best_function": "Supreme combat commander, transcendent frontline fighter, and immortal army leader.",
-            "team_value": "God Tier"
+            "best_function": "Supreme combat commander, transcendent frontline fighter, and immortal army leader."
           },
           {
             "id": "antares",
@@ -796,18 +746,13 @@
             "role": "Monarch of Destruction",
             "tier": "SSS — GOD TIER",
             "tier_category": "SSS",
+            "power_number": 9800000,
             "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK"],
-            "description": "The strongest and most destructive Monarch in existence. Incarnation of total annihilation who can transform into an apocalyptic red dragon and command legions of ancient dragons.",
-            "abilities": [
-              "Breath of Destruction (Erases matter and soul)",
-              "Dragon Monarch Metamorphosis & Dragon's Fear",
-              "Telepathic Army Command & Cataclysmic Pyromancy"
-            ],
-            "power_level": 99,
+            "description": "The strongest and most destructive Monarch in existence. Incarnation of total annihilation who transforms into an apocalyptic red dragon commanding legions of ancient dragons.",
+            "abilities": ["Breath of Destruction (Erases matter & soul)", "Dragon Monarch Metamorphosis & Dragon's Fear", "Cataclysmic Pyromancy"],
             "stats": { "raw_power": 10.0, "hax": 9.7, "speed": 9.6, "durability": 10.0, "synergy": 9.2, "battle_iq": 9.5 },
             "feats": "Turned entire continents to ash and pushed Sung Jinwoo to the absolute limit in a multi-dimensional clash.",
-            "best_function": "Ultimate offensive powerhouse, destructive area annihilator, and terrifying frontline monster.",
-            "team_value": "God Tier"
+            "best_function": "Ultimate offensive powerhouse, destructive area annihilator, and terrifying frontline monster."
           },
           {
             "id": "sung_il_hwan",
@@ -816,18 +761,13 @@
             "role": "Ruler's Vessel / Master Combatant",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 5200000,
             "eligible_roles": ["LEADER", "FIGHTER", "TANK", "SUPPORT", "ASSASSIN"],
-            "description": "Father of Sung Jinwoo and the strongest human vessel empowered directly by the Rulers. Possesses divine celestial aura, blinding speed, and high-tier telekinetic combat prowess.",
-            "abilities": [
-              "Ruler's Authority & Spiritual Aura Infusion",
-              "Supersonic Melee Combat & Invisible Dagger Techniques",
-              "Divine Durability & Monarch-Stalling Tenacity"
-            ],
-            "power_level": 94,
+            "description": "Father of Sung Jinwoo and strongest human vessel empowered directly by the Rulers. Possesses divine celestial aura and high-tier telekinetic combat prowess.",
+            "abilities": ["Ruler's Authority & Spiritual Aura Infusion", "Supersonic Melee Combat & Invisible Daggers", "Monarch-Stalling Tenacity"],
             "stats": { "raw_power": 9.3, "hax": 9.0, "speed": 9.6, "durability": 9.2, "synergy": 9.0, "battle_iq": 9.7 },
             "feats": "Fought off both the Monarch of Frost and Monarch of Fangs simultaneously to protect his son's awakening.",
-            "best_function": "High-level combat leader, agile frontline assassin, and tenacious disruptor.",
-            "team_value": "Elite"
+            "best_function": "High-level combat leader, agile frontline assassin, and tenacious disruptor."
           },
           {
             "id": "bellion",
@@ -836,18 +776,13 @@
             "role": "Grand Marshal Shadow",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 5400000,
             "eligible_roles": ["LEADER", "FIGHTER", "TANK", "SUPPORT", "ASSASSIN"],
-            "description": "Born from the fruit of the World Tree and original servant of Ashborn. He wields a massive segmented whip-sword and possesses wings capable of generating devastating gale-force shockwaves.",
-            "abilities": [
-              "Segmented Whip-Sword Mastery & Mountain-Cleaving Strikes",
-              "High-Speed Winged Flight & Shockwave Generation",
-              "Infinite Shadow Regeneration & Absolute Army Discipline"
-            ],
-            "power_level": 95,
+            "description": "Born from the fruit of the World Tree and original servant of Ashborn. He wields a massive segmented whip-sword and possesses wings generating gale-force shockwaves.",
+            "abilities": ["Segmented Whip-Sword & Mountain Cleaves", "High-Speed Winged Flight & Shockwaves", "Infinite Shadow Regeneration"],
             "stats": { "raw_power": 9.5, "hax": 9.1, "speed": 9.4, "durability": 9.6, "synergy": 9.8, "battle_iq": 9.6 },
             "feats": "Overpowered Marshal Beru in single combat with casual ease and commanded millions of shadow troops.",
-            "best_function": "Elite commander, supreme frontline vanguard, and immovable defensive anchor.",
-            "team_value": "Elite"
+            "best_function": "Elite commander, supreme frontline vanguard, and immovable defensive anchor."
           },
           {
             "id": "beru",
@@ -856,18 +791,13 @@
             "role": "Ant King / Shadow Marshal",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4900000,
             "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
-            "description": "The mutant Ant King evolved through predation into an unstoppable apex predator. As a Shadow Marshal, he combines ferocious speed, hyper-regeneration, venom, and potent healing magic.",
-            "abilities": [
-              "Predator Absorption & Rapid Genetic Adaptability",
-              "Supersonic Burrowing & Venomous Claw Assaults",
-              "Healing Magic, Telepathy & Intimidation Roar"
-            ],
-            "power_level": 93,
+            "description": "The mutant Ant King evolved through predation into an unstoppable apex predator. As a Shadow Marshal, he combines ferocious speed, hyper-regeneration, and healing magic.",
+            "abilities": ["Predator Absorption & Genetic Adaptability", "Supersonic Burrowing & Venomous Claws", "Healing Magic, Telepathy & Intimidation Roar"],
             "stats": { "raw_power": 9.2, "hax": 9.2, "speed": 9.8, "durability": 9.1, "synergy": 9.5, "battle_iq": 9.4 },
-            "feats": "Annihilated multiple Japanese and Korean S-Rank hunters in minutes on Jeju Island and stood against Monarchs.",
-            "best_function": "High-velocity assassin, vicious brawler, and tactical frontline disruptor.",
-            "team_value": "Elite"
+            "feats": "Annihilated multiple Japanese and Korean S-Rank hunters on Jeju Island and clashed with Monarchs.",
+            "best_function": "High-velocity assassin, vicious brawler, and tactical frontline disruptor."
           },
           {
             "id": "thomas_andre",
@@ -876,18 +806,13 @@
             "role": "National-Level Hunter / Ruler's Vessel",
             "tier": "S — NATIONAL LEVEL",
             "tier_category": "S",
+            "power_number": 2300000,
             "eligible_roles": ["LEADER", "FIGHTER", "TANK"],
-            "description": "The top-ranked hunter in the United States and the undisputed physical colossus of humanity. Wields the Spiritual Body Manifestation of a Ruler with unmatched kinetic impact.",
-            "abilities": [
-              "Reinforcement (Invulnerable golden skin armor)",
-              "Capture (Gravitational black hole pull)",
-              "Smash / Power of the Ruler (Shockwaves that shatter skyscrapers)"
-            ],
-            "power_level": 90,
+            "description": "The top-ranked hunter in the US and undisputed physical colossus of humanity. Wields the Spiritual Body Manifestation of a Ruler with unmatched kinetic impact.",
+            "abilities": ["Reinforcement (Invulnerable golden skin)", "Capture (Gravitational black hole pull)", "Power of the Ruler Shockwaves"],
             "stats": { "raw_power": 9.4, "hax": 8.5, "speed": 8.4, "durability": 9.8, "synergy": 8.8, "battle_iq": 8.7 },
-            "feats": "Survived a direct beatdown from the Monarch of Iron Body and subdued Kamish the Dragon during the first raid.",
-            "best_function": "Supreme human physical tank, frontline battering ram, and crowd-controlling leader.",
-            "team_value": "Very High"
+            "feats": "Survived direct beatdown from the Monarch of Iron Body and subdued Kamish the Dragon during the first raid.",
+            "best_function": "Supreme human physical tank, frontline battering ram, and crowd-controlling leader."
           },
           {
             "id": "liu_zhigang",
@@ -896,18 +821,13 @@
             "role": "National-Level Hunter / Ruler's Vessel",
             "tier": "S — NATIONAL LEVEL",
             "tier_category": "S",
+            "power_number": 2100000,
             "eligible_roles": ["LEADER", "FIGHTER", "TANK", "ASSASSIN"],
-            "description": "China's greatest hunter and premier swordmaster. Channels the divine telekinesis and celestial aura of a Ruler through dual bladed slashes of monstrous reach and speed.",
-            "abilities": [
-              "Divine Blade Qi & Spatial Slashing",
-              "Ruler's Authority (Telekinetic projectile mastery)",
-              "Instantaneous Flash Step & Giant-Slaying Swordplay"
-            ],
-            "power_level": 89,
+            "description": "China's greatest hunter and premier swordmaster. Channels divine telekinesis and celestial aura of a Ruler through dual bladed slashes of monstrous reach.",
+            "abilities": ["Divine Blade Qi & Spatial Slashing", "Ruler's Authority Telekinesis", "Instantaneous Flash Step & Giant Slaying"],
             "stats": { "raw_power": 9.2, "hax": 8.4, "speed": 9.5, "durability": 8.8, "synergy": 8.7, "battle_iq": 9.3 },
             "feats": "Effortlessly slaughtered an army of giant-type dungeon monsters emerging from an S-Rank gate on China's coast.",
-            "best_function": "Blistering melee hyper-carry, precision giant-slayer, and tactical offensive captain.",
-            "team_value": "Very High"
+            "best_function": "Blistering melee hyper-carry, precision giant-slayer, and tactical offensive captain."
           },
           {
             "id": "christopher_reed",
@@ -916,18 +836,13 @@
             "role": "National-Level Hunter / Ruler's Vessel",
             "tier": "S — NATIONAL LEVEL",
             "tier_category": "S",
+            "power_number": 1900000,
             "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK"],
-            "description": "One of the five National-Level Hunters, acting as the divine vessel for a Ruler. Capable of complete Spiritual Body Manifestation, turning into a colossal titan of incandescent fire.",
-            "abilities": [
-              "Spiritual Body Manifestation (Giant Fiery Avatar)",
-              "Hellfire Pyrokinesis & Incineration Auras",
-              "Ruler's Authority & Omnidirectional Blast Waves"
-            ],
-            "power_level": 88,
+            "description": "National-Level Hunter acting as divine vessel for a Ruler. Capable of complete Spiritual Body Manifestation, transforming into a colossal titan of incandescent fire.",
+            "abilities": ["Spiritual Body Manifestation (Fiery Avatar)", "Hellfire Pyrokinesis & Incineration", "Omnidirectional Blast Waves"],
             "stats": { "raw_power": 9.3, "hax": 8.6, "speed": 8.5, "durability": 8.9, "synergy": 8.5, "battle_iq": 8.8 },
             "feats": "Forced three Monarchs (Sillad, Rakan, and Tarnak) to team up and ambush him simultaneously in his mansion.",
-            "best_function": "Massive area-of-effect nuker, blazing frontline brawler, and overwhelming offensive anchor.",
-            "team_value": "Very High"
+            "best_function": "Massive area-of-effect nuker, blazing frontline brawler, and overwhelming offensive anchor."
           },
           {
             "id": "go_gunhee",
@@ -936,18 +851,13 @@
             "role": "Hunter Association Chairman / Ruler's Vessel",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4500000,
             "eligible_roles": ["LEADER", "FIGHTER", "MAGE", "TANK", "SUPPORT"],
-            "description": "The venerable chairman of the Korean Hunter Association whose frail mortal heart restrained the immense spirit of the Brightest Fragment of Light. In combat, his radiant blows shatter solid stone.",
-            "abilities": [
-              "Radiant Celestial Aura & Ruler's Authority",
-              "Heavy Kinetic Shockwave Punches",
-              "Unrivaled Battle Wisdom & Tactical Command"
-            ],
-            "power_level": 91,
+            "description": "Chairman of the Korean Hunter Association whose body was chosen by the Brightest Fragment of Light. In combat, his radiant blows shatter solid stone.",
+            "abilities": ["Radiant Celestial Aura & Ruler's Authority", "Heavy Kinetic Shockwave Punches", "Master Tactical Strategist"],
             "stats": { "raw_power": 9.1, "hax": 8.9, "speed": 8.8, "durability": 9.0, "synergy": 9.6, "battle_iq": 9.9 },
             "feats": "Fought tooth and nail against the Monarch of Frost, enduring lethal icy punctures to protect humanity's secrets.",
-            "best_function": "Inspiring veteran commander, high-impact brawler, and master tactical strategist.",
-            "team_value": "Elite"
+            "best_function": "Inspiring veteran commander, high-impact brawler, and master tactical strategist."
           },
           {
             "id": "rakan",
@@ -956,18 +866,13 @@
             "role": "Monarch of Fangs",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4800000,
             "eligible_roles": ["FIGHTER", "TANK", "ASSASSIN"],
-            "description": "The savage ruler of wild beast humanoids and ancient predators. Capable of monstrous lupine transformation with hypersonic speed, razor claws, and instinctual savagery.",
-            "abilities": [
-              "White Werewolf Transformation & Bloodlust Frenzy",
-              "Apex Predator Reflexes & Hyper-Speed Tracking",
-              "Telekinetic Rend & Flesh-Tearing Claws"
-            ],
-            "power_level": 92,
+            "description": "The savage ruler of wild beast humanoids. Capable of monstrous lupine transformation with hypersonic speed, razor claws, and instinctual savagery.",
+            "abilities": ["White Werewolf Transformation & Bloodlust", "Apex Predator Reflexes & Hyper Tracking", "Telekinetic Rend & Flesh-Tearing Claws"],
             "stats": { "raw_power": 9.3, "hax": 8.8, "speed": 9.7, "durability": 9.2, "synergy": 8.4, "battle_iq": 9.0 },
             "feats": "Ambushed Christopher Reed and fought Sung Jinwoo in the Monarch dimensional skirmish.",
-            "best_function": "Terrifying flank assassin, hyper-aggressive frontline beast, and high-speed shredder.",
-            "team_value": "Elite"
+            "best_function": "Terrifying flank assassin, hyper-aggressive frontline beast, and high-speed shredder."
           },
           {
             "id": "sillad",
@@ -976,18 +881,13 @@
             "role": "Monarch of Frost",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4900000,
             "eligible_roles": ["FIGHTER", "MAGE", "TANK"],
-            "description": "The sovereign of eternal winter and absolute zero frost. Summons ice golems, blizzard spears, and deep-freeze domains that instantly paralyze cellular motion.",
-            "abilities": [
-              "Absolute Zero Cryomancy & Glacial Spikes",
-              "Frost Armor & Deep Freeze Immobilization",
-              "Frost Golem Summoning & Blizzard Tempest"
-            ],
-            "power_level": 93,
+            "description": "Sovereign of eternal winter and absolute zero frost. Summons ice golems, blizzard spears, and deep-freeze domains that instantly paralyze cellular motion.",
+            "abilities": ["Absolute Zero Cryomancy & Glacial Spikes", "Frost Armor & Deep Freeze Immobilization", "Frost Golem Summoning & Blizzard Tempest"],
             "stats": { "raw_power": 9.1, "hax": 9.4, "speed": 9.1, "durability": 9.3, "synergy": 8.9, "battle_iq": 9.2 },
             "feats": "Killed Go Gunhee and impaled Sung Jinwoo's mortal heart before the true Shadow Monarch fully awakened.",
-            "best_function": "Zone-controlling cryo mage, immobilizer, and durable frontline glacier.",
-            "team_value": "Elite"
+            "best_function": "Zone-controlling cryo mage, immobilizer, and durable frontline glacier."
           },
           {
             "id": "baran",
@@ -996,18 +896,13 @@
             "role": "Monarch of White Flames",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4700000,
             "eligible_roles": ["FIGHTER", "MAGE", "TANK"],
             "description": "The demonic monarch atop the Demon Castle who wields white-hot lightning and hellfire swords while riding the twin-headed ancient wyvern Kaisellin.",
-            "abilities": [
-              "Hell's White Lightning & Thunderstorm Generation",
-              "Demon Army Summoning & Demonic Swordplay",
-              "Dragon Breath Link & Storm Armor"
-            ],
-            "power_level": 92,
+            "abilities": ["Hell's White Lightning & Thunderstorms", "Demon Army Summoning & Swordplay", "Dragon Breath Link & Storm Armor"],
             "stats": { "raw_power": 9.4, "hax": 9.0, "speed": 9.0, "durability": 9.2, "synergy": 8.7, "battle_iq": 9.1 },
             "feats": "Rivaled the primordial shadow armies in the ancient celestial wars.",
-            "best_function": "Devastating hybrid elemental striker, thunder mage, and frontline warlord.",
-            "team_value": "Elite"
+            "best_function": "Devastating hybrid elemental striker, thunder mage, and frontline warlord."
           },
           {
             "id": "tarnak",
@@ -1016,18 +911,13 @@
             "role": "Monarch of the Iron Body",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4600000,
             "eligible_roles": ["FIGHTER", "TANK"],
-            "description": "The sovereign of indestructible density and physical hardness. His body cannot be pierced by ordinary dimensional weaponry or elemental attacks.",
-            "abilities": [
-              "Adamantine Body (Near-impenetrable physical armor)",
-              "Titan Impact Slashes & Earth-Cracking Stomp",
-              "Kinetic Shockwave Absorption"
-            ],
-            "power_level": 91,
+            "description": "Sovereign of indestructible density and physical hardness. His body cannot be pierced by ordinary dimensional weaponry or elemental attacks.",
+            "abilities": ["Adamantine Body (Near-impenetrable armor)", "Titan Impact Slashes & Earth Stomp", "Kinetic Shockwave Absorption"],
             "stats": { "raw_power": 9.3, "hax": 8.5, "speed": 8.6, "durability": 9.9, "synergy": 8.5, "battle_iq": 8.9 },
             "feats": "Broke Thomas Andre's arm and tanked direct national-level strikes without flinching.",
-            "best_function": "Unbreakable frontline tank and heavy kinetic brawler.",
-            "team_value": "Elite"
+            "best_function": "Unbreakable frontline tank and heavy kinetic brawler."
           },
           {
             "id": "legia",
@@ -1036,18 +926,13 @@
             "role": "Monarch of the Beginning",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4700000,
             "eligible_roles": ["FIGHTER", "TANK"],
-            "description": "The colossal King of Giants imprisoned within Japan's massive S-Rank Gate. Even while shackled with mana-draining divine chains, his presence warped the dimensional boundary.",
-            "abilities": [
-              "Titan Stature & Colossal Physical Magnitude",
-              "Earthquake Fist & Shockwave Howl",
-              "Monarch-grade Durability & Mana Resistance"
-            ],
-            "power_level": 92,
+            "description": "The colossal King of Giants imprisoned within Japan's massive S-Rank Gate. Even while shackled with mana-draining divine chains, his presence warped space.",
+            "abilities": ["Titan Stature & Colossal Magnitude", "Earthquake Fist & Shockwave Howl", "Monarch-grade Durability"],
             "stats": { "raw_power": 9.6, "hax": 8.7, "speed": 8.0, "durability": 9.7, "synergy": 8.2, "battle_iq": 8.8 },
             "feats": "Required the Rulers' most complex ancient sealing formations to contain his raw power.",
-            "best_function": "Colossal frontline wall and massive physical juggernaut.",
-            "team_value": "Elite"
+            "best_function": "Colossal frontline wall and massive physical juggernaut."
           },
           {
             "id": "querehsha",
@@ -1056,18 +941,13 @@
             "role": "Monarch of Plagues",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4600000,
             "eligible_roles": ["FIGHTER", "MAGE"],
-            "description": "The queen of swarming horrors, toxic secretions, and parasitic diseases. Can dissolve flesh in seconds, manipulate millions of venomous organisms, and resurrect rotting cadavers.",
-            "abilities": [
-              "Necrotic Acid Mist & Deadly Neurotoxins",
-              "Parasitic Hive Swarm & Corpse Puppetry",
-              "Chitin Shielding & Cellular Regeneration"
-            ],
-            "power_level": 91,
+            "description": "Queen of swarming horrors, toxic secretions, and parasitic diseases. Can dissolve flesh in seconds, manipulate millions of insects, and resurrect cadavers.",
+            "abilities": ["Necrotic Acid Mist & Deadly Neurotoxins", "Parasitic Hive Swarm & Corpse Puppetry", "Cellular Regeneration"],
             "stats": { "raw_power": 8.9, "hax": 9.5, "speed": 9.2, "durability": 9.0, "synergy": 8.8, "battle_iq": 9.1 },
             "feats": "Corrupted massive city districts and fought Beru and Sung Jinwoo in a multi-front toxic clash.",
-            "best_function": "Corrosive status-effect mage, swarm summoner, and deadly attrition fighter.",
-            "team_value": "Elite"
+            "best_function": "Corrosive status-effect mage, swarm summoner, and deadly attrition fighter."
           },
           {
             "id": "yogumunt",
@@ -1076,18 +956,13 @@
             "role": "Monarch of Transfiguration",
             "tier": "SS — MONARCH / RULER ELITE",
             "tier_category": "SS",
+            "power_number": 4600000,
             "eligible_roles": ["FIGHTER", "MAGE"],
-            "description": "The ancient sorcerer Monarch who commands demonic illusions, shape-shifting transformations, and dimensional distortion magic.",
-            "abilities": [
-              "Reality Distortion & Spatial Illusion",
-              "Transfiguration Curses & Dimensional Hexes",
-              "Demonic Sorcery Array"
-            ],
-            "power_level": 91,
+            "description": "Ancient sorcerer Monarch who commands demonic illusions, shape-shifting transformations, and dimensional distortion magic.",
+            "abilities": ["Reality Distortion & Spatial Illusion", "Transfiguration Curses & Dimensional Hexes", "Demonic Sorcery Array"],
             "stats": { "raw_power": 9.0, "hax": 9.6, "speed": 8.9, "durability": 8.9, "synergy": 8.9, "battle_iq": 9.5 },
             "feats": "Operated as Antares's primary arcane strategist and magical siege commander.",
-            "best_function": "Master arcane controller, illusionist, and strategic backline nuke.",
-            "team_value": "Elite"
+            "best_function": "Master arcane controller, illusionist, and strategic backline nuke."
           },
           {
             "id": "igris",
@@ -1096,38 +971,28 @@
             "role": "Shadow Marshal / Sword Saint",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 850000,
             "eligible_roles": ["FIGHTER", "MAGE", "TANK", "SUPPORT", "ASSASSIN"],
-            "description": "Jinwoo's very first high-level shadow knight who promoted all the way to Marshal. A noble chivalric swordsman who channels lightning through dual greatswords with peerless precision.",
-            "abilities": [
-              "Dominator's Touch (Telekinetic blade redirection)",
-              "Lightning Greatsword Cleave & Chivalric Duelling",
-              "Tactical Shadow Form & Infinite Regeneration"
-            ],
-            "power_level": 87,
+            "description": "Jinwoo's very first high-level shadow knight who promoted all the way to Marshal. Chivalric swordsman who channels lightning through dual greatswords.",
+            "abilities": ["Dominator's Touch (Telekinesis)", "Lightning Greatsword Cleave", "Tactical Shadow Form & Regeneration"],
             "stats": { "raw_power": 8.7, "hax": 8.4, "speed": 9.3, "durability": 8.9, "synergy": 9.7, "battle_iq": 9.6 },
             "feats": "Mastered telekinesis to wield blades remotely and severed high-ranking Monarch commanders in battle.",
-            "best_function": "Versatile swordmaster, deadly precision assassin, and reliable tactical commander.",
-            "team_value": "Elite"
+            "best_function": "Versatile swordmaster, deadly precision assassin, and reliable tactical commander."
           },
           {
             "id": "cha_hae_in",
             "name": "Cha Hae-In",
-            "title": "The Radiant Blade / Korea's Vice Guild Master",
+            "title": "The Radiant Blade / Korea's Top Sword S-Rank",
             "role": "S-Rank Hunter / Sword Master",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 680000,
             "eligible_roles": ["FIGHTER", "SUPPORT", "ASSASSIN"],
-            "description": "Korea's 9th S-Rank hunter and the Vice Master of the Hunters Guild. Possesses extraordinary sensory perception for mana and strikes with blinding sword velocity and light-infused dancing steps.",
-            "abilities": [
-              "Sword Dance & Blade of Light (Super-dense light aura)",
-              "Mana Smell / Hyper-Acuity Senses",
-              "Acrobatic Hypersonic Sword Technique"
-            ],
-            "power_level": 84,
+            "description": "Korea's 9th S-Rank hunter and Vice Master of Hunters Guild. Strikes with blinding sword velocity and light-infused dancing steps.",
+            "abilities": ["Sword Dance & Blade of Light", "Mana Smell Hyper Acuity", "Acrobatic Hypersonic Sword Technique"],
             "stats": { "raw_power": 8.3, "hax": 7.9, "speed": 9.4, "durability": 7.9, "synergy": 9.1, "battle_iq": 9.2 },
             "feats": "Defeated Igris in a formal sparring duel and easily severed Queen Ant guardians during the Jeju raid.",
-            "best_function": "High-agility assassin, swift duelist, and precision combat supporter.",
-            "team_value": "Very High"
+            "best_function": "High-agility assassin, swift duelist, and precision combat supporter."
           },
           {
             "id": "baek_yoonho",
@@ -1136,18 +1001,13 @@
             "role": "S-Rank Hunter / Beast Transformation",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 640000,
             "eligible_roles": ["FIGHTER", "TANK"],
-            "description": "Master of the prestigious White Tiger Guild. He can undergo partial or full transformation into a monstrous White Tiger beast, exponentially magnifying muscle mass, speed, and regenerative toughness.",
-            "abilities": [
-              "White Tiger Metamorphosis & Beastial Rage",
-              "Eyes of the Beast (Mana evaluation vision)",
-              "Crushing Claws & Apex Predator Roar"
-            ],
-            "power_level": 83,
+            "description": "Master of White Tiger Guild. Transforms into a monstrous White Tiger beast, magnifying muscle mass, speed, and regenerative toughness.",
+            "abilities": ["White Tiger Metamorphosis & Beast Rage", "Eyes of the Beast Mana Vision", "Crushing Claws & Predator Roar"],
             "stats": { "raw_power": 8.7, "hax": 7.8, "speed": 8.8, "durability": 8.9, "synergy": 8.6, "battle_iq": 8.9 },
             "feats": "Clashed claw-to-blade against S-Rank assassin Kang Taeshik and held off red gate monsters with ease.",
-            "best_function": "Fierce brawler, resilient secondary tank, and physical vanguard.",
-            "team_value": "Very High"
+            "best_function": "Fierce brawler, resilient secondary tank, and physical vanguard."
           },
           {
             "id": "choi_jong_in",
@@ -1156,18 +1016,13 @@
             "role": "S-Rank Mage / Master of Fire",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 690000,
             "eligible_roles": ["MAGE", "SUPPORT"],
-            "description": "Guild Master of Hunters and recognized as South Korea's strongest magic-type hunter. Specializes in incinerating entire dungeon zones with apocalyptic flame spears and flame tornadoes.",
-            "abilities": [
-              "Flame Spear & Dragon Fire Torrent",
-              "Inferno Vortex (Massive AoE firestorm)",
-              "Flame Barrier & Strategic Fire Bombardment"
-            ],
-            "power_level": 84,
+            "description": "Guild Master of Hunters and South Korea's strongest magic-type hunter. Incinerates entire dungeon zones with flame spears and tornadoes.",
+            "abilities": ["Flame Spear & Dragon Fire Torrent", "Inferno Vortex AoE Firestorm", "Flame Barrier & Fire Bombardment"],
             "stats": { "raw_power": 8.8, "hax": 8.1, "speed": 8.0, "durability": 7.8, "synergy": 8.9, "battle_iq": 9.2 },
             "feats": "Vaporized entire swarms of giant monster ants with a single cast of his signature firestorm.",
-            "best_function": "Massive long-range fire nuker and battlefield zone controller.",
-            "team_value": "Very High"
+            "best_function": "Massive long-range fire nuker and battlefield zone controller."
           },
           {
             "id": "goto_ryuji",
@@ -1176,18 +1031,13 @@
             "role": "S-Rank Hunter / Draw Sword Guild Master",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 750000,
             "eligible_roles": ["FIGHTER", "ASSASSIN"],
-            "description": "The undisputed apex hunter of Japan and leader of the elite Draw Sword Guild. A ruthless swordsman whose katana draws slice through sound barriers and heavily armored monstrosities.",
-            "abilities": [
-              "Iaijutsu Speed Cleaves & Vacuum Blades",
-              "Instinctive Killing Intent & Hypersonic Reflexes",
-              "Dual Stance Slicing Form"
-            ],
-            "power_level": 85,
+            "description": "The undisputed apex hunter of Japan. A ruthless swordsman whose katana draws slice through sound barriers and heavily armored monstrosities.",
+            "abilities": ["Iaijutsu Speed Cleaves & Vacuum Blades", "Instinctive Killing Intent Reflexes", "Dual Stance Slicing Form"],
             "stats": { "raw_power": 8.5, "hax": 7.9, "speed": 9.3, "durability": 8.0, "synergy": 8.2, "battle_iq": 9.1 },
             "feats": "Sparred evenly with pre-Monarch Sung Jinwoo, pushing him to reveal deadly killing intent.",
-            "best_function": "Hypersonic assassin, lethal frontline sword striker, and tempo controller.",
-            "team_value": "Very High"
+            "best_function": "Hypersonic assassin, lethal frontline sword striker, and tempo controller."
           },
           {
             "id": "lennart_niermann",
@@ -1196,18 +1046,13 @@
             "role": "S-Rank Hunter / Energy Combatant",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 670000,
             "eligible_roles": ["FIGHTER"],
-            "description": "The strongest hunter in Germany, ranked 12th in the world. Channels condensed magical gauntlet blasts and heavy energy artillery into frontline melee impacts.",
-            "abilities": [
-              "Charge Gauntlet Pulse & Mana Blast Fists",
-              "Heavy Kinetic Deflection Shield",
-              "High-Output Melee Barrage"
-            ],
-            "power_level": 84,
+            "description": "The strongest hunter in Germany, ranked 12th globally. Channels condensed magical gauntlet blasts and energy artillery into melee impacts.",
+            "abilities": ["Charge Gauntlet Pulse Fists", "Kinetic Deflection Shield", "High-Output Melee Barrage"],
             "stats": { "raw_power": 8.6, "hax": 8.0, "speed": 8.5, "durability": 8.6, "synergy": 8.6, "battle_iq": 9.0 },
             "feats": "Resisted the psychic pressure of Thomas Andre and fought bravely in the international hunter summit crisis.",
-            "best_function": "Heavy frontline brawler and disciplined European champion.",
-            "team_value": "High"
+            "best_function": "Heavy frontline brawler and disciplined European champion."
           },
           {
             "id": "hwang_dongsoo",
@@ -1216,18 +1061,13 @@
             "role": "S-Rank Hunter / Bruiser",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 600000,
             "eligible_roles": ["FIGHTER", "ASSASSIN"],
-            "description": "A notoriously vicious Korean S-Rank hunter who joined America's Scavenger Guild. Possesses brutal physical power, wind manipulation, and ruthless execution techniques.",
-            "abilities": [
-              "Gale-Force Heavy Strike & Wind Guillotine",
-              "Reinforced Muscle Density",
-              "Bloodthirsty Grappling & Skull Crush"
-            ],
-            "power_level": 82,
+            "description": "A notoriously vicious Korean S-Rank hunter in America's Scavenger Guild. Possesses brutal physical power and wind manipulation.",
+            "abilities": ["Gale-Force Heavy Strike & Wind Guillotine", "Reinforced Muscle Density", "Bloodthirsty Grappling"],
             "stats": { "raw_power": 8.5, "hax": 7.7, "speed": 8.6, "durability": 8.4, "synergy": 7.5, "battle_iq": 8.3 },
             "feats": "Dominated high-rank dungeon bosses with bare hands and terrorized international guilds.",
-            "best_function": "Brutal frontline slugger and merciless executioner.",
-            "team_value": "High"
+            "best_function": "Brutal frontline slugger and merciless executioner."
           },
           {
             "id": "ma_dongwook",
@@ -1236,18 +1076,13 @@
             "role": "S-Rank Hunter / Heavy Tank",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 630000,
             "eligible_roles": ["FIGHTER", "TANK"],
-            "description": "The stalwart Master of the Fame Myreung Guild. Specializes in gigantification magic and kinetic impact absorption, creating an unshakeable shield for allied raid teams.",
-            "abilities": [
-              "Body Enlargement Gigantification Magic",
-              "Fortress Shield Wall & Kinetic Deflection",
-              "Taunt Roar & Seismic Quake"
-            ],
-            "power_level": 83,
+            "description": "Master of Myreung Guild. Specializes in gigantification magic and kinetic impact absorption, creating an unshakeable shield for allied raid teams.",
+            "abilities": ["Body Enlargement Gigantification", "Fortress Shield Wall & Deflection", "Taunt Roar & Seismic Quake"],
             "stats": { "raw_power": 8.4, "hax": 7.8, "speed": 7.6, "durability": 9.2, "synergy": 9.0, "battle_iq": 9.0 },
             "feats": "Held the defensive frontline against hundreds of mutant ant warriors during the Jeju Island assault.",
-            "best_function": "Elite human frontline tank and protective vanguard anchor.",
-            "team_value": "High"
+            "best_function": "Elite human frontline tank and protective vanguard anchor."
           },
           {
             "id": "tusk",
@@ -1256,18 +1091,13 @@
             "role": "Shadow Mage Commander",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 800000,
             "eligible_roles": ["MAGE", "SUPPORT"],
-            "description": "The shadow extraction of the Great Shaman Kargalgan. Armed with the Orb of Avarice, his magical firepower doubles, unleashing continent-shaking flame spheres, gravity magic, and hymns of frenzy.",
-            "abilities": [
-              "Orb of Avarice Amplified Pyromancy (Fire Dragon Call)",
-              "Hymn of Giants & Hymn of Agony (Mass Buffs/Debuffs)",
-              "Gravity Hex & Telekinetic Shielding"
-            ],
-            "power_level": 87,
+            "description": "Shadow extraction of Great Shaman Kargalgan. Armed with the Orb of Avarice, his magical firepower doubles, unleashing flame spheres and hymns of frenzy.",
+            "abilities": ["Orb of Avarice Pyromancy (Fire Dragon Call)", "Hymn of Giants & Hymn of Agony", "Gravity Hex & Shielding"],
             "stats": { "raw_power": 9.1, "hax": 9.2, "speed": 7.9, "durability": 8.3, "synergy": 9.5, "battle_iq": 9.3 },
             "feats": "Incinerated hundreds of high-ranking demons and giant invaders with single spells using the Orb of Avarice.",
-            "best_function": "Devastating backline artillery nuke and mass team enhancer.",
-            "team_value": "Elite"
+            "best_function": "Devastating backline artillery nuke and mass team enhancer."
           },
           {
             "id": "kargalgan",
@@ -1276,18 +1106,13 @@
             "role": "High Orc Shaman / Curse Master",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 720000,
             "eligible_roles": ["MAGE", "SUPPORT"],
-            "description": "The prime living High Orc Shaman whose ancient blood chants can bend gravity, bless entire battalions with giant-size strength, and cast protective dome barriers resistant to high-grade magic.",
-            "abilities": [
-              "Hymn of the Fire Dragon & Meteor Crash",
-              "Curse of Slow & Crippling Exhaustion Hex",
-              "Protection Barrier & Strength Amplification Totems"
-            ],
-            "power_level": 85,
+            "description": "Prime High Orc Shaman whose ancient blood chants bend gravity, bless battalions with giant strength, and cast protective dome barriers.",
+            "abilities": ["Hymn of the Fire Dragon Meteor", "Curse of Slow & Crippling Hex", "Protection Barrier & Strength Totems"],
             "stats": { "raw_power": 8.8, "hax": 9.0, "speed": 7.8, "durability": 8.0, "synergy": 9.1, "battle_iq": 9.2 },
-            "feats": "Cast protective shields that repelled multiple hunter spells simultaneously and commanded an army of high orc elites.",
-            "best_function": "Backline magical bombardier, curse weaver, and team-wide buffer.",
-            "team_value": "Very High"
+            "feats": "Cast protective shields that repelled multiple hunter spells simultaneously and commanded an army of high orcs.",
+            "best_function": "Backline magical bombardier, curse weaver, and team-wide buffer."
           },
           {
             "id": "greed",
@@ -1296,18 +1121,13 @@
             "role": "Elite Shadow Combatant",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 680000,
             "eligible_roles": ["FIGHTER", "SUPPORT", "ASSASSIN"],
-            "description": "Extracted from the vicious S-Rank hunter Hwang Dongsoo. As a shadow general, he combines relentless physical power with unyielding shadow loyalty and bone-shattering shockwaves.",
-            "abilities": [
-              "Shadow Wind Slashes & Crushing Shockwaves",
-              "Infinite Stamina & Shadow Regeneration",
-              "Flank Ambush & Frontline Brawling"
-            ],
-            "power_level": 84,
+            "description": "Extracted from S-Rank hunter Hwang Dongsoo. Combines relentless physical power with unyielding shadow loyalty and shockwaves.",
+            "abilities": ["Shadow Wind Slashes & Shockwaves", "Infinite Stamina & Regeneration", "Flank Ambush & Frontline Brawling"],
             "stats": { "raw_power": 8.6, "hax": 8.1, "speed": 8.7, "durability": 8.8, "synergy": 9.0, "battle_iq": 8.8 },
             "feats": "Smashed through hordes of dungeon monsters and served as vanguard in Jinwoo's international operations.",
-            "best_function": "Brutal frontline flanker and tenacious secondary assassin.",
-            "team_value": "High"
+            "best_function": "Brutal frontline flanker and tenacious secondary assassin."
           },
           {
             "id": "esil_radiru",
@@ -1316,18 +1136,13 @@
             "role": "Demon Noble / Hybrid Combatant",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 420000,
             "eligible_roles": ["MAGE", "SUPPORT", "ASSASSIN"],
-            "description": "The nimble noble spearwoman of the Demon Castle. Possesses agile demonic spearmanship, lightning-fast strikes, and demonic aura projection that disorients enemy ranks.",
-            "abilities": [
-              "Demon Clan Spear Arts & Lightning Thrusts",
-              "Demonic Bloodline Aura & Guiding Intellect",
-              "Stealth Reconnaissance & High Agility"
-            ],
-            "power_level": 80,
+            "description": "Noble spearwoman of the Demon Castle. Possesses agile demonic spearmanship, lightning-fast strikes, and demonic aura projection.",
+            "abilities": ["Demon Clan Spear Arts & Thrusts", "Demonic Bloodline Aura & Guiding Intellect", "Stealth Reconnaissance"],
             "stats": { "raw_power": 7.9, "hax": 8.0, "speed": 8.9, "durability": 7.8, "synergy": 8.9, "battle_iq": 8.7 },
             "feats": "Guided Sung Jinwoo through the top floors of the Demon Castle and held her ground against high demons.",
-            "best_function": "High-mobility support scout, rapid spear assassin, and tactical guide.",
-            "team_value": "High"
+            "best_function": "High-mobility support scout, rapid spear assassin, and tactical guide."
           },
           {
             "id": "baruka",
@@ -1336,18 +1151,13 @@
             "role": "Ice Elf Boss / Assassin Warlord",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 510000,
             "eligible_roles": ["ASSASSIN"],
-            "description": "The lethal chieftain of the Ice Elves in the Red Gate. Wields Baruka's Dagger with blinding assassin speed, stealth manipulation, and freezing frost blade techniques.",
-            "abilities": [
-              "Stealth & Ice Mist Cloaking",
-              "Baruka's Twin Dagger Tempest (Hypersonic slashes)",
-              "Frost Enchantment & Vital Strike Precision"
-            ],
-            "power_level": 82,
+            "description": "Lethal chieftain of Ice Elves in the Red Gate. Wields Baruka's Dagger with blinding assassin speed, stealth, and freezing blades.",
+            "abilities": ["Stealth & Ice Mist Cloaking", "Baruka's Twin Dagger Tempest", "Frost Enchantment & Vital Strikes"],
             "stats": { "raw_power": 8.1, "hax": 8.0, "speed": 9.3, "durability": 7.9, "synergy": 7.9, "battle_iq": 8.8 },
             "feats": "Pushed pre-awakened Jinwoo and Igris simultaneously to their limits inside the Red Gate blizzard.",
-            "best_function": "Pure stealth assassin, frost-edge infiltrator, and vital-point executioner.",
-            "team_value": "High"
+            "best_function": "Pure stealth assassin, frost-edge infiltrator, and vital-point executioner."
           },
           {
             "id": "jima",
@@ -1356,18 +1166,13 @@
             "role": "High-Level Shadow / Aquatic Warrior",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 530000,
             "eligible_roles": ["MAGE", "TANK"],
-            "description": "The serpent-tailed boss of the ocean gate extracted into Jinwoo's shadow legion. Can expand his physical stature to colossal size and wield dual tridents imbued with sea curses.",
-            "abilities": [
-              "Gigantification & Trident Swarm Cleave",
-              "Aquatic Mana Surge & Water Spout Blast",
-              "Thick Scaled Armor & Regenerative Flesh"
-            ],
-            "power_level": 82,
+            "description": "Serpent boss of ocean gate extracted into shadow legion. Can expand physical stature to colossal size and wield dual tridents.",
+            "abilities": ["Gigantification & Trident Swarm", "Aquatic Mana Surge Blast", "Scaled Armor & Regeneration"],
             "stats": { "raw_power": 8.4, "hax": 8.1, "speed": 8.1, "durability": 8.9, "synergy": 8.7, "battle_iq": 8.5 },
             "feats": "Speared massive gate giants and held back dungeon tidal floods during subterranean incursions.",
-            "best_function": "Heavy amphibious tank, trident crowd controller, and magical bruiser.",
-            "team_value": "High"
+            "best_function": "Heavy amphibious tank, trident crowd controller, and magical bruiser."
           },
           {
             "id": "vulcan",
@@ -1376,18 +1181,13 @@
             "role": "Demon King-level Giant",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 480000,
             "eligible_roles": ["MAGE", "TANK"],
-            "description": "A grotesque, towering demon behemoth clad in thick demonic armor wielding a spiked greatclub crackling with demonic lightning and magma shockwaves.",
-            "abilities": [
-              "Magma Ground Smash & Seismic Tremors",
-              "Demonic Lightning Rage & Berserk Mode",
-              "Heavy Bludgeoning Armor"
-            ],
-            "power_level": 81,
+            "description": "Towering demon behemoth clad in thick armor wielding a spiked greatclub crackling with demonic lightning and magma shockwaves.",
+            "abilities": ["Magma Ground Smash & Tremors", "Demonic Lightning Rage Berserk", "Heavy Bludgeoning Armor"],
             "stats": { "raw_power": 8.6, "hax": 7.8, "speed": 7.5, "durability": 8.8, "synergy": 7.8, "battle_iq": 7.9 },
             "feats": "Ruled the 50th floor of the Demon Castle with an iron fist, crushing entire legions of lesser demons.",
-            "best_function": "Demonic battering tank, earthquake disruptor, and brute force basher.",
-            "team_value": "High"
+            "best_function": "Demonic battering tank, earthquake disruptor, and brute force basher."
           },
           {
             "id": "iron",
@@ -1396,18 +1196,13 @@
             "role": "Heavy Armored Shadow Soldier",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 490000,
             "eligible_roles": ["TANK"],
-            "description": "The shadow created from the fallen A-Rank hunter Kim Chul. Wields a colossal tower shield and broadaxe, drawing all enemy aggression through a deafening taunt shout.",
-            "abilities": [
-              "Roar of Taunt (Forces all enemies to attack him)",
-              "Tower Shield Bulwark & Kinetic Redirection",
-              "Shadow Resilience & High Stamina"
-            ],
-            "power_level": 81,
+            "description": "Shadow created from fallen A-Rank hunter Kim Chul. Wields colossal tower shield and broadaxe, drawing all enemy aggression.",
+            "abilities": ["Roar of Taunt (Forces aggro)", "Tower Shield Bulwark", "Shadow Resilience & Stamina"],
             "stats": { "raw_power": 8.2, "hax": 8.0, "speed": 7.7, "durability": 9.1, "synergy": 9.3, "battle_iq": 8.1 },
             "feats": "Protected Jinwoo's rear flank countless times by drawing fire from high-ranking dungeon bosses.",
-            "best_function": "Dedicated aggro magnet, impenetrable tower shield wall, and frontline protector.",
-            "team_value": "High"
+            "best_function": "Dedicated aggro magnet, impenetrable tower shield wall, and frontline protector."
           },
           {
             "id": "tank",
@@ -1416,18 +1211,13 @@
             "role": "Shadow Beast Tank",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 460000,
             "eligible_roles": ["TANK"],
-            "description": "The shadow of the mutant alpha Ice Bear from the Red Gate. Enormous muscular frame protected by shadow armor, charging headfirst into enemy ranks like a living freight train.",
-            "abilities": [
-              "Juggernaut Trample & Bone-Crushing Bite",
-              "Shadow Fur Armor & Beast Fortitude",
-              "Vanguard Charge & Shock Absorption"
-            ],
-            "power_level": 80,
+            "description": "Shadow of mutant alpha Ice Bear from Red Gate. Enormous muscular frame charging headfirst into enemy ranks like a freight train.",
+            "abilities": ["Juggernaut Trample & Bite", "Shadow Fur Armor & Fortitude", "Vanguard Charge & Shock Absorption"],
             "stats": { "raw_power": 8.3, "hax": 7.5, "speed": 8.0, "durability": 9.0, "synergy": 8.9, "battle_iq": 8.0 },
             "feats": "Plowed through lines of demon soldiers and broke enemy siege barricades with brute momentum.",
-            "best_function": "Disruptive beast vanguard, bullet-sponge tank, and line-breaker.",
-            "team_value": "High"
+            "best_function": "Disruptive beast vanguard, bullet-sponge tank, and line-breaker."
           },
           {
             "id": "kaisel",
@@ -1436,18 +1226,13 @@
             "role": "Shadow Sky Mount / Aerial Specialist",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 510000,
             "eligible_roles": ["SUPPORT", "ASSASSIN"],
-            "description": "The shadow of the ancient twin-headed wyvern Kaisellin. Provides unrivaled aerial mobility, sky reconnaissance, and diving breath attacks at supersonic speeds.",
-            "abilities": [
-              "Supersonic Flight & Aerial Evasion",
-              "Lightning/Shadow Breath Bombardment",
-              "Rapid Battlefield Transport & Air Superiority"
-            ],
-            "power_level": 82,
+            "description": "Shadow of ancient twin-headed wyvern Kaisellin. Provides unrivaled aerial mobility, sky reconnaissance, and diving breath attacks.",
+            "abilities": ["Supersonic Flight & Aerial Evasion", "Lightning/Shadow Breath Bombardment", "Rapid Battlefield Transport"],
             "stats": { "raw_power": 8.1, "hax": 8.2, "speed": 9.6, "durability": 8.2, "synergy": 9.4, "battle_iq": 8.6 },
             "feats": "Carried Jinwoo across intercontinental battlefields in seconds, evading Monarch artillery.",
-            "best_function": "Supreme aerial mobility support, high-speed flank chaser, and sky surveillance.",
-            "team_value": "High"
+            "best_function": "Supreme aerial mobility support, high-speed flank chaser, and sky surveillance."
           },
           {
             "id": "kandiaru_architect",
@@ -1456,18 +1241,13 @@
             "role": "System Architect / Master Mage",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 810000,
             "eligible_roles": ["MAGE"],
-            "description": "The enigmatic ancient sorcerer who engineered the System interface connecting mortal hunters to the power of the Shadow Monarch. Wields multi-limbed magic and puppet constructs.",
-            "abilities": [
-              "System Code Manipulation & Mana Puppetry",
-              "Multi-Arm Arcane Blast Barrage",
-              "Spatial Barrier & Entity Telekinesis"
-            ],
-            "power_level": 86,
+            "description": "Enigmatic ancient sorcerer who engineered the System interface connecting mortal hunters to the power of the Shadow Monarch.",
+            "abilities": ["System Code & Mana Puppetry", "Multi-Arm Arcane Blast Barrage", "Spatial Barrier & Telekinesis"],
             "stats": { "raw_power": 8.8, "hax": 9.5, "speed": 8.6, "durability": 8.4, "synergy": 8.1, "battle_iq": 9.8 },
             "feats": "Designed the entire leveling system and fought Jinwoo inside the Cartenon Temple.",
-            "best_function": "Master arcane controller, hax spellcaster, and tactical system manipulator.",
-            "team_value": "Elite"
+            "best_function": "Master arcane controller, hax spellcaster, and tactical system manipulator."
           },
           {
             "id": "statue_of_god",
@@ -1476,18 +1256,13 @@
             "role": "Ancient Combat Entity",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 820000,
             "eligible_roles": ["MAGE"],
-            "description": "The colossal stone idol sitting atop the throne in the Double Dungeon. Can incinerate S-Rank tier beings with twin laser beams from its glowing eyes and crush invaders with its gargantuan stride.",
-            "abilities": [
-              "Disintegration Eye Beams (God's Gaze)",
-              "Colossal Kinetic Stomp & Indestructible Stone Husk",
-              "Rule of the Temple (Forced Obedience Domain)"
-            ],
-            "power_level": 86,
+            "description": "Colossal stone idol sitting atop the throne in the Double Dungeon. Incinerates S-Rank beings with twin laser eye beams.",
+            "abilities": ["Disintegration Eye Beams (God's Gaze)", "Kinetic Stomp & Stone Husk", "Temple Forced Obedience"],
             "stats": { "raw_power": 9.2, "hax": 9.1, "speed": 7.4, "durability": 9.4, "synergy": 7.4, "battle_iq": 8.3 },
             "feats": "Instantly wiped out high-level Korean hunter raid members in the first chapter's Cartenon Temple.",
-            "best_function": "Devastating ocular laser artillery and immovable monolithic fortress.",
-            "team_value": "Very High"
+            "best_function": "Devastating ocular laser artillery and immovable monolithic fortress."
           },
           {
             "id": "kang_taeshik",
@@ -1496,18 +1271,13 @@
             "role": "B-Rank Hunter / Master Assassin",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 380000,
             "eligible_roles": ["ASSASSIN"],
-            "description": "A lethal inspector from the Korean Hunter Association whose assassination prowess far exceeded his official rank. Specializes in instant stealth cloaking and throat-slitting dagger arts.",
-            "abilities": [
-              "Stealth (Complete optical and auditory cloaking)",
-              "Camouflage Strike & Dagger Flurry",
-              "Preternatural Bloodlust & Lethal Vital Targeting"
-            ],
-            "power_level": 80,
+            "description": "Lethal inspector from Korean Hunter Association whose assassination prowess far exceeded his official rank. Specializes in instant stealth cloaking.",
+            "abilities": ["Stealth (Complete cloaking)", "Camouflage Strike & Dagger Flurry", "Lethal Vital Targeting"],
             "stats": { "raw_power": 7.8, "hax": 8.2, "speed": 9.2, "durability": 7.4, "synergy": 7.8, "battle_iq": 9.0 },
             "feats": "Assassinated multiple hunters in an instant without leaving trace or sound.",
-            "best_function": "Stealth infiltrator, backline disruptor, and sudden assassination executioner.",
-            "team_value": "High"
+            "best_function": "Stealth infiltrator, backline disruptor, and sudden assassination executioner."
           },
           {
             "id": "woo_jinchul",
@@ -1516,18 +1286,13 @@
             "role": "A-Rank Hunter / Combat Inspector",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 370000,
             "eligible_roles": ["SUPPORT"],
-            "description": "The dependable Chief Inspector of the Korean Hunter Association Surveillance Team. Combines solid martial arts, iron discipline, organizational intelligence, and calm tactical leadership.",
-            "abilities": [
-              "Reinforced Kinetic Fist Boxing",
-              "Tactical Analysis & Threat Evaluation",
-              "Command Coordination & Morale Stabilizer"
-            ],
-            "power_level": 79,
+            "description": "Dependable Chief Inspector of Surveillance Team. Combines solid martial arts, iron discipline, and organizational intelligence.",
+            "abilities": ["Reinforced Kinetic Fist Boxing", "Tactical Analysis & Threat Evaluation", "Command Coordination"],
             "stats": { "raw_power": 7.9, "hax": 7.5, "speed": 8.4, "durability": 8.1, "synergy": 9.4, "battle_iq": 9.3 },
             "feats": "Successfully coordinated national raid teams and assumed presidency of the Hunter Association.",
-            "best_function": "Strategic commander, team morale pillar, and reliable frontline coordinator.",
-            "team_value": "High"
+            "best_function": "Strategic commander, team morale pillar, and reliable frontline coordinator."
           },
           {
             "id": "park_heejin",
@@ -1536,18 +1301,13 @@
             "role": "A-Rank Mage / Sensory Support",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 310000,
             "eligible_roles": ["SUPPORT"],
-            "description": "An intuitive elite mage from the White Tiger Guild possessing keen danger sense, elemental magic projectiles, and acute mana radar.",
-            "abilities": [
-              "Mana Pulse Radar & Danger Premonition",
-              "Elemental Wind & Stone Barrier",
-              "Allied Resource Conservation Guide"
-            ],
-            "power_level": 76,
+            "description": "Intuitive elite mage from White Tiger Guild possessing keen danger sense and acute mana radar.",
+            "abilities": ["Mana Pulse Radar & Premonition", "Elemental Wind & Stone Barrier", "Allied Resource Conservation"],
             "stats": { "raw_power": 7.5, "hax": 7.7, "speed": 7.8, "durability": 7.4, "synergy": 9.0, "battle_iq": 8.8 },
             "feats": "Correctly identified Jinwoo's true nature during the Red Gate incident, surviving against all odds.",
-            "best_function": "Sensory reconnaissance, ambush prevention, and tactical utility support.",
-            "team_value": "High"
+            "best_function": "Sensory reconnaissance, ambush prevention, and tactical utility support."
           },
           {
             "id": "yoo_jinho",
@@ -1556,18 +1316,13 @@
             "role": "D-Rank Hunter / Guild Vice Master",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 300000,
             "eligible_roles": ["SUPPORT"],
-            "description": "The fiercely loyal Vice Master of the Ahjin Guild. Equipped with ultra-expensive legendary artifact gear, he provides flawless raid logistics, morale boosting, and unbreakable dedication.",
-            "abilities": [
-              "High-Grade Artifact Armor & Shielding",
-              "Master Raid Logistics & Resource Management",
-              "Unflinching Loyalty & Allied Morale Boost"
-            ],
-            "power_level": 75,
+            "description": "Fiercely loyal Vice Master of Ahjin Guild. Equipped with ultra-expensive legendary artifact gear, provides flawless raid logistics and unbreakable dedication.",
+            "abilities": ["High-Grade Artifact Armor & Shielding", "Master Raid Logistics & Management", "Allied Morale Boost"],
             "stats": { "raw_power": 7.1, "hax": 7.4, "speed": 7.4, "durability": 8.4, "synergy": 9.7, "battle_iq": 8.6 },
             "feats": "Endured brutal torture by Hwang Dongsoo without betraying Sung Jinwoo, demonstrating legendary fortitude.",
-            "best_function": "Unbreakable morale support, high-end gear defense, and perfect team cohesion catalyst.",
-            "team_value": "High"
+            "best_function": "Unbreakable morale support, high-end gear defense, and perfect team cohesion catalyst."
           },
           {
             "id": "min_byung_gyu",
@@ -1576,18 +1331,13 @@
             "role": "S-Rank Healer / Divine Enhancer",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 750000,
             "eligible_roles": ["HEALER", "SUPPORT"],
-            "description": "South Korea's premier healing specialist and retired S-Rank legend. Possesses divine recovery magic capable of reattaching severed limbs and boosting allied combat stats exponentially.",
-            "abilities": [
-              "Radiant Resurrection-tier Healing & Cellular Regeneration",
-              "Holy Buff Chants (Boosts allied Attack, Defense & Speed)",
-              "Camouflage & Sensory Concealment"
-            ],
-            "power_level": 86,
+            "description": "South Korea's premier healing specialist and retired S-Rank legend. Possesses divine recovery magic capable of reattaching severed limbs and boosting stats exponentially.",
+            "abilities": ["Radiant Resurrection Healing", "Holy Buff Chants (Atk, Def, Spd)", "Camouflage & Sensory Concealment"],
             "stats": { "raw_power": 7.4, "hax": 9.4, "speed": 8.3, "durability": 8.0, "synergy": 9.9, "battle_iq": 9.5 },
             "feats": "Healed national strike teams on Jeju Island; even as a temporary shadow, his blessing saved Cha Hae-In's life.",
-            "best_function": "Supreme pure healer, unmatched stat booster, and life-saving clutch support.",
-            "team_value": "Elite"
+            "best_function": "Supreme pure healer, unmatched stat booster, and life-saving clutch support."
           },
           {
             "id": "lee_joohee",
@@ -1596,18 +1346,13 @@
             "role": "B-Rank Healer / Recovery Specialist",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 340000,
             "eligible_roles": ["HEALER", "SUPPORT"],
-            "description": "The kind-hearted healer who repeatedly kept Sung Jinwoo alive in his weakest days. Specializes in rapid wound closure, fatigue removal, and soothing restoration wards.",
-            "abilities": [
-              "Rapid Trauma Healing & Bleeding Cessation",
-              "Fatigue Removal & Stamina Restoration Wards",
-              "Calming Aura & Mental Fortitude Aid"
-            ],
-            "power_level": 78,
+            "description": "The kind-hearted healer who repeatedly kept Sung Jinwoo alive in his weakest days. Specializes in rapid wound closure and soothing restoration wards.",
+            "abilities": ["Rapid Trauma Healing & Bleeding Cessation", "Fatigue Removal & Stamina Restoration", "Calming Aura & Fortitude Aid"],
             "stats": { "raw_power": 6.8, "hax": 8.6, "speed": 7.5, "durability": 7.4, "synergy": 9.3, "battle_iq": 8.5 },
             "feats": "Survived the horrors of the Cartenon Temple through steady healing discipline and quick triage.",
-            "best_function": "Reliable mid-battle triage healer, stamina rejuvenator, and calm support.",
-            "team_value": "High"
+            "best_function": "Reliable mid-battle triage healer, stamina rejuvenator, and calm support."
           },
           {
             "id": "akari_shimizu",
@@ -1616,18 +1361,13 @@
             "role": "S-Rank Healer / Draw Sword Guild",
             "tier": "A+ — TOP S-RANK",
             "tier_category": "A+",
+            "power_number": 680000,
             "eligible_roles": ["HEALER"],
-            "description": "One of Japan's most celebrated S-Rank hunters and chief healer of the Draw Sword Guild. Specializes in large-radius healing barriers and instantaneous high-level mana restoration.",
-            "abilities": [
-              "High-Sphere Sanctuary Healing Dome",
-              "Instantaneous Deep Tissue Regeneration",
-              "Purification Wave & Status Cleansing"
-            ],
-            "power_level": 84,
+            "description": "One of Japan's most celebrated S-Rank hunters and chief healer of Draw Sword Guild. Specializes in large-radius healing barriers and mana restoration.",
+            "abilities": ["High-Sphere Sanctuary Healing Dome", "Deep Tissue Regeneration", "Purification Wave & Cleansing"],
             "stats": { "raw_power": 7.2, "hax": 9.1, "speed": 8.1, "durability": 7.8, "synergy": 9.5, "battle_iq": 9.1 },
             "feats": "Provided vital wide-area healing support to the 20+ S-Rank hunters during the Jeju island raid.",
-            "best_function": "High-level raid healer, AoE restorative anchor, and status-cleanser.",
-            "team_value": "Very High"
+            "best_function": "High-level raid healer, AoE restorative anchor, and status-cleanser."
           },
           {
             "id": "han_semi",
@@ -1636,18 +1376,13 @@
             "role": "A-Rank Healer / Guild Specialist",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 330000,
             "eligible_roles": ["HEALER"],
-            "description": "An established Korean A-Rank healing specialist known for swift emergency triage, durable vitality wards, and consistent support under extreme pressure.",
-            "abilities": [
-              "Vitality Restoration Ward",
-              "Emergency Suture Magic & Pain Suppression",
-              "Allied Armor Reinforcement Blessing"
-            ],
-            "power_level": 77,
+            "description": "An established Korean A-Rank healing specialist known for swift emergency triage and durable vitality wards under extreme pressure.",
+            "abilities": ["Vitality Restoration Ward", "Emergency Suture Magic & Pain Suppression", "Allied Armor Blessing"],
             "stats": { "raw_power": 6.9, "hax": 8.3, "speed": 7.6, "durability": 7.5, "synergy": 9.0, "battle_iq": 8.6 },
             "feats": "Supported multiple high-tier A-Rank dungeon raids with zero party casualties.",
-            "best_function": "Dependable emergency healer and front-line stabilizer.",
-            "team_value": "High"
+            "best_function": "Dependable emergency healer and front-line stabilizer."
           },
           {
             "id": "jung_yerim",
@@ -1656,23 +1391,15 @@
             "role": "High-Level Healer & Support",
             "tier": "A — HIGH-LEVEL SHADOW / HUNTER",
             "tier_category": "A",
+            "power_number": 320000,
             "eligible_roles": ["HEALER"],
-            "description": "The dedicated healing and protective specialist for the prestigious Knight Guild, proficient in rapid barrier deployment and continuous regenerative charms.",
-            "abilities": [
-              "Continuous Regeneration Aura",
-              "Protective Light Shield",
-              "Swift Recovery Chant"
-            ],
-            "power_level": 76,
+            "description": "The dedicated healing and protective specialist for Knight Guild, proficient in rapid barrier deployment and continuous regenerative charms.",
+            "abilities": ["Continuous Regeneration Aura", "Protective Light Shield", "Swift Recovery Chant"],
             "stats": { "raw_power": 6.7, "hax": 8.2, "speed": 7.5, "durability": 7.4, "synergy": 8.9, "battle_iq": 8.5 },
             "feats": "Kept the Knight Guild vanguard alive through punishing multi-wave monster gate assaults.",
-            "best_function": "Sustained recovery healer and protective shield assistant.",
-            "team_value": "High"
+            "best_function": "Sustained recovery healer and protective shield assistant."
           }
         ];
-
-        let usedCardIds = new Set();
-        let currentDrawnCard = null;
 
         const ROLES = [
             { id: "LEADER", name: "👑 TEAM LEADER", key: "LEADER" },
@@ -1684,24 +1411,12 @@
             { id: "ASSASSIN", name: "🗡️ ASSASSIN", key: "ASSASSIN" }
         ];
 
-        const WEIGHTS = {
-            raw_power: 0.30,
-            hax: 0.20,
-            speed: 0.15,
-            durability: 0.10,
-            synergy: 0.15,
-            battle_iq: 0.10
-        };
-
-        const teamSlots = {
-            LEADER: null,
-            FIGHTER: null,
-            MAGE: null,
-            TANK: null,
-            HEALER: null,
-            SUPPORT: null,
-            ASSASSIN: null
-        };
+        let numPlayers = 2;
+        let currentPlayerTurn = 0; // 0 = P1, 1 = P2, etc.
+        let viewingPlayerIndex = 0;
+        let players = [];
+        let usedCardIds = new Set();
+        let currentDrawnCard = null;
 
         // Web Audio Synthesizer
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -1715,8 +1430,8 @@
 
             if (type === 'draw') {
                 osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(220, now);
-                osc.frequency.exponentialRampToValueAtTime(880, now + 0.18);
+                osc.frequency.setValueAtTime(240, now);
+                osc.frequency.exponentialRampToValueAtTime(900, now + 0.18);
                 gain.gain.setValueAtTime(0.2, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
                 osc.start(now);
@@ -1724,42 +1439,96 @@
             } else if (type === 'assign') {
                 osc.type = 'sine';
                 osc.frequency.setValueAtTime(440, now);
-                osc.frequency.exponentialRampToValueAtTime(660, now + 0.15);
+                osc.frequency.exponentialRampToValueAtTime(700, now + 0.15);
                 gain.gain.setValueAtTime(0.25, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                 osc.start(now);
                 osc.stop(now + 0.2);
             } else if (type === 'discard') {
                 osc.type = 'square';
-                osc.frequency.setValueAtTime(300, now);
-                osc.frequency.exponentialRampToValueAtTime(100, now + 0.2);
+                osc.frequency.setValueAtTime(280, now);
+                osc.frequency.exponentialRampToValueAtTime(90, now + 0.2);
                 gain.gain.setValueAtTime(0.15, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
                 osc.start(now);
                 osc.stop(now + 0.2);
-            } else if (type === 'complete') {
+            } else if (type === 'battle') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(120, now);
+                osc.frequency.setValueAtTime(350, now + 0.1);
+                osc.frequency.setValueAtTime(80, now + 0.25);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            } else if (type === 'victory') {
                 osc.type = 'triangle';
                 osc.frequency.setValueAtTime(523.25, now);
                 osc.frequency.setValueAtTime(659.25, now + 0.15);
                 osc.frequency.setValueAtTime(783.99, now + 0.3);
                 osc.frequency.setValueAtTime(1046.50, now + 0.45);
-                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.setValueAtTime(0.35, now);
                 gain.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
                 osc.start(now);
                 osc.stop(now + 0.8);
             }
         }
 
-        function resetGame() {
+        function setPlayerCount(count) {
+            numPlayers = count;
+            document.querySelectorAll('.player-count-btn').forEach((btn, idx) => {
+                btn.classList.toggle('active', (idx === 0 && count === 2) || (idx === 1 && count === 3) || (idx === 2 && count === 4));
+            });
+            resetMultiplayerGame();
+        }
+
+        function resetMultiplayerGame() {
             usedCardIds.clear();
-            for (let role of ROLES) {
-                teamSlots[role.id] = null;
-            }
             currentDrawnCard = null;
+            currentPlayerTurn = 0;
+            viewingPlayerIndex = 0;
+
+            players = [];
+            for (let i = 0; i < numPlayers; i++) {
+                players.push({
+                    id: i,
+                    name: `Player ${i + 1}`,
+                    tagClass: `tag-p${i + 1}`,
+                    team: {
+                        LEADER: null,
+                        FIGHTER: null,
+                        MAGE: null,
+                        TANK: null,
+                        HEALER: null,
+                        SUPPORT: null,
+                        ASSASSIN: null
+                    }
+                });
+            }
+
+            document.getElementById('arenaModal').classList.remove('active');
+            renderTabs();
             renderPositionsGrid();
             renderDrawnCard();
-            updateStatsUI();
-            document.getElementById('resultsModal').classList.remove('active');
+            updateTurnUI();
+        }
+
+        function renderTabs() {
+            const tabsContainer = document.getElementById('teamTabs');
+            tabsContainer.innerHTML = '';
+
+            players.forEach((p, idx) => {
+                const filledCount = Object.values(p.team).filter(v => v !== null).length;
+                const btn = document.createElement('button');
+                btn.className = `team-tab-btn ${idx === viewingPlayerIndex ? 'active' : ''}`;
+                btn.innerHTML = `<span class="player-tag ${p.tagClass}">${p.name}</span> <span>(${filledCount}/7)</span>`;
+                btn.onclick = () => {
+                    viewingPlayerIndex = idx;
+                    renderTabs();
+                    renderPositionsGrid();
+                };
+                tabsContainer.appendChild(btn);
+            });
         }
 
         function getTierClass(cat) {
@@ -1775,9 +1544,10 @@
         function renderPositionsGrid() {
             const grid = document.getElementById('positionsGrid');
             grid.innerHTML = '';
+            const p = players[viewingPlayerIndex];
 
             ROLES.forEach(role => {
-                const card = teamSlots[role.id];
+                const card = p.team[role.id];
                 const isFilled = card !== null;
                 const isLeader = role.id === 'LEADER';
 
@@ -1796,19 +1566,17 @@
                 if (isFilled) {
                     const tierClass = getTierClass(card.tier_category);
                     innerHTML += `
-                        <div class="slot-card-content">
+                        <div>
                             <div class="card-name-slot">${card.name}</div>
-                            <span class="card-tier-badge ${tierClass}">${card.tier}</span>
-                            <div style="font-size:0.85rem; color: #94a3b8; margin-top:2px;">${card.role}</div>
-                            <ul class="slot-abilities-list">
-                                ${card.abilities.slice(0, 2).map(a => `<li>${a}</li>`).join('')}
-                            </ul>
+                            <span class="card-tier-badge ${tierClass}">${card.tier_category}-Tier</span>
+                            <div class="power-score-tag">⚡ Combat Power: ${card.power_number.toLocaleString()}</div>
+                            <div style="font-size:0.8rem; color: #94a3b8; margin-top:2px;">${card.role}</div>
                         </div>
                     `;
                 } else {
                     innerHTML += `
                         <div class="empty-placeholder">
-                            <span>Ready for Assignment</span>
+                            <span>Ready to Draft</span>
                         </div>
                     `;
                 }
@@ -1827,30 +1595,39 @@
         function drawCard() {
             const availableDeck = CARDS_DATABASE.filter(c => !usedCardIds.has(c.id));
             if (availableDeck.length === 0) {
-                alert("No more cards remaining in the deck!");
+                alert("No more cards remaining in the deck pool!");
                 return;
             }
 
-            const emptyPositions = ROLES.filter(r => teamSlots[r.id] === null);
-            if (emptyPositions.length === 0) return;
+            const p = players[currentPlayerTurn];
+            const emptyPositions = ROLES.filter(r => p.team[r.id] === null);
+            if (emptyPositions.length === 0) {
+                advanceTurn();
+                return;
+            }
 
             playSfx('draw');
             const randIdx = Math.floor(Math.random() * availableDeck.length);
             currentDrawnCard = availableDeck[randIdx];
+
+            // Auto-switch view to current player's team
+            viewingPlayerIndex = currentPlayerTurn;
+            renderTabs();
+            renderPositionsGrid();
             renderDrawnCard();
-            updateStatsUI();
         }
 
         function renderDrawnCard() {
             const container = document.getElementById('drawnCardContainer');
+            const p = players[currentPlayerTurn];
 
             if (!currentDrawnCard) {
                 container.className = "drawn-card-container empty-draw";
                 container.innerHTML = `
-                    <div style="font-size: 3rem; margin-bottom: 10px;">🎴</div>
-                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 8px;">No Active Card</h3>
-                    <p style="color: var(--text-muted); font-size: 0.9rem; max-width: 260px;">
-                        Press the <strong>[ . ]</strong> key on your keyboard or click <strong>DRAW CARD</strong> to summon a fighter.
+                    <div style="font-size: 3rem; margin-bottom: 8px;">🎴</div>
+                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 6px;">No Active Card</h3>
+                    <p style="color: var(--text-muted); font-size: 0.88rem; max-width: 250px;">
+                        <strong style="color: var(--neon-blue);">${p.name}</strong>, press <strong>[ . ]</strong> or click <strong>DRAW CARD</strong> to draft.
                     </p>
                 `;
                 return;
@@ -1858,11 +1635,11 @@
 
             const card = currentDrawnCard;
             const tierClass = getTierClass(card.tier_category);
-            const emptyRoles = ROLES.filter(r => teamSlots[r.id] === null);
+            const emptyRoles = ROLES.filter(r => p.team[r.id] === null);
 
             container.className = "drawn-card-container";
             container.innerHTML = `
-                <div class="drawn-card-header">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid rgba(0,210,255,0.2); padding-bottom: 6px;">
                     <div>
                         <div class="drawn-name">${card.name}</div>
                         <div class="drawn-title">${card.title}</div>
@@ -1879,17 +1656,12 @@
                     </ul>
                 </div>
 
-                <div>
-                    <div class="section-title">Important Feats</div>
-                    <div class="drawn-feats">${card.feats}</div>
+                <div style="font-size:0.85rem; color:var(--gold); background:rgba(255,209,102,0.1); padding:6px 8px; border-radius:6px; border:1px solid rgba(255,209,102,0.25);">
+                    <strong>Combat Power:</strong> ${card.power_number.toLocaleString()} • ${card.best_function}
                 </div>
 
-                <div class="drawn-team-func">
-                    <span style="color:#fff;">Team Value: ${card.team_value}</span> — ${card.best_function}
-                </div>
-
-                <div class="card-decision-box">
-                    <div class="section-title" style="color: var(--green);">Assign to Empty Position:</div>
+                <div style="margin-top: 4px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px;">
+                    <div class="section-title" style="color: var(--green);">Assign to ${p.name}'s Position:</div>
                     <div class="slot-selector-grid">
                         ${emptyRoles.map(r => {
                             const isRec = card.eligible_roles && card.eligible_roles.includes(r.id);
@@ -1901,21 +1673,29 @@
                             `;
                         }).join('')}
                     </div>
-                    <button class="btn-discard" onclick="discardCurrentCard()">❌ Discard Card (Never appear again)</button>
+                    <button class="btn-discard" style="width: 100%;" onclick="discardCurrentCard()">❌ Discard from Draft (Cannot be drawn again)</button>
                 </div>
             `;
         }
 
         function assignCardToSlot(roleId) {
             if (!currentDrawnCard) return;
-            teamSlots[roleId] = currentDrawnCard;
+            const p = players[currentPlayerTurn];
+            p.team[roleId] = currentDrawnCard;
             usedCardIds.add(currentDrawnCard.id);
             playSfx('assign');
             currentDrawnCard = null;
+
+            renderTabs();
             renderPositionsGrid();
             renderDrawnCard();
-            updateStatsUI();
-            checkTeamCompletion();
+            updateTurnUI();
+
+            if (checkAllSquadsFilled()) {
+                setTimeout(startTournamentArena, 600);
+            } else {
+                advanceTurn();
+            }
         }
 
         function discardCurrentCard() {
@@ -1924,141 +1704,160 @@
             playSfx('discard');
             currentDrawnCard = null;
             renderDrawnCard();
-            updateStatsUI();
+            updateTurnUI();
+            advanceTurn();
         }
 
-        function updateStatsUI() {
-            const remaining = CARDS_DATABASE.filter(c => !usedCardIds.has(c.id)).length;
-            document.getElementById('deckCount').innerText = remaining;
+        function advanceTurn() {
+            // Find next player who still has unfilled slots
+            let nextTurn = (currentPlayerTurn + 1) % numPlayers;
+            let attempts = 0;
+            while (attempts < numPlayers) {
+                const unfilled = Object.values(players[nextTurn].team).filter(v => v === null).length;
+                if (unfilled > 0) {
+                    currentPlayerTurn = nextTurn;
+                    viewingPlayerIndex = currentPlayerTurn;
+                    break;
+                }
+                nextTurn = (nextTurn + 1) % numPlayers;
+                attempts++;
+            }
 
-            const filled = Object.values(teamSlots).filter(v => v !== null).length;
-            document.getElementById('squadFilledCount').innerText = `${filled} / 7`;
+            renderTabs();
+            renderPositionsGrid();
+            renderDrawnCard();
+            updateTurnUI();
+        }
+
+        function updateTurnUI() {
+            const remaining = CARDS_DATABASE.filter(c => !usedCardIds.has(c.id)).length;
+            document.getElementById('poolCount').innerText = remaining;
+
+            const p = players[currentPlayerTurn];
+            const tag = document.getElementById('currentTurnTag');
+            tag.innerText = p.name;
+            tag.className = `player-tag ${p.tagClass}`;
+
+            const nameEl = document.getElementById('activePlayerTurnName');
+            if (nameEl) nameEl.innerText = p.name;
 
             const btnDraw = document.getElementById('btnDraw');
-            btnDraw.disabled = filled === 7 || currentDrawnCard !== null || remaining === 0;
+            btnDraw.disabled = currentDrawnCard !== null || remaining === 0 || checkAllSquadsFilled();
         }
 
-        function checkTeamCompletion() {
-            const filledCount = Object.values(teamSlots).filter(v => v !== null).length;
-            if (filledCount === 7) {
-                setTimeout(() => {
-                    playSfx('complete');
-                    evaluateFinalTeam();
-                }, 400);
-            }
+        function checkAllSquadsFilled() {
+            return players.every(p => Object.values(p.team).every(v => v !== null));
         }
 
-        function evaluateFinalTeam() {
-            const statTotals = { raw_power: 0, hax: 0, speed: 0, durability: 0, synergy: 0, battle_iq: 0 };
+        // PvP Tournament Arena Battle Simulator
+        function startTournamentArena() {
+            playSfx('battle');
+            const arenaModal = document.getElementById('arenaModal');
+            const versusDisplay = document.getElementById('versusDisplay');
+            const battleLogs = document.getElementById('battleLogs');
+            const championPodium = document.getElementById('championPodium');
 
-            Object.values(teamSlots).forEach(card => {
-                for (let k in card.stats) {
-                    statTotals[k] += card.stats[k];
+            versusDisplay.innerHTML = '';
+            battleLogs.innerHTML = '';
+
+            // Calculate each player's total power and weighted scores
+            const results = players.map(p => {
+                let totalCombatPower = 0;
+                let rawPowerSum = 0, haxSum = 0, speedSum = 0, durSum = 0, synSum = 0, biqSum = 0;
+                const names = Object.values(p.team).map(c => c.name);
+
+                Object.values(p.team).forEach(c => {
+                    totalCombatPower += c.power_number;
+                    rawPowerSum += c.stats.raw_power;
+                    haxSum += c.stats.hax;
+                    speedSum += c.stats.speed;
+                    durSum += c.stats.durability;
+                    synSum += c.stats.synergy;
+                    biqSum += c.stats.battle_iq;
+                });
+
+                // Synergies
+                let synBonus = 0;
+                if ((names.includes("Sung Jinwoo") || names.includes("Ashborn")) && 
+                    Object.values(p.team).some(c => ["Bellion", "Beru", "Igris", "Tusk", "Greed", "Iron", "Tank", "Kaisel", "Jima"].includes(c.name))) {
+                    synBonus += 0.5;
+                    totalCombatPower *= 1.15; // 15% Shadow Monarch Army multiplier
                 }
+
+                if (names.includes("Min Byung-Gyu")) {
+                    synBonus += 0.4;
+                    totalCombatPower *= 1.10; // 10% S-Rank Divine healing & buff boost
+                }
+
+                if (names.includes("Thomas Andre") && (names.includes("Sung Jinwoo") || names.includes("Liu Zhigang"))) {
+                    synBonus += 0.3;
+                    totalCombatPower *= 1.05;
+                }
+
+                const avgPower = (rawPowerSum / 7) * 0.30 + (haxSum / 7) * 0.20 + (speedSum / 7) * 0.15 + (durSum / 7) * 0.10 + (Math.min(10, (synSum / 7) + synBonus)) * 0.15 + (biqSum / 7) * 0.10;
+                const finalRating = parseFloat((avgPower * 10).toFixed(1));
+
+                return {
+                    player: p,
+                    totalCombatPower: Math.round(totalCombatPower),
+                    rating: finalRating,
+                    leader: p.team.LEADER,
+                    fighter: p.team.FIGHTER,
+                    mage: p.team.MAGE,
+                    tank: p.team.TANK,
+                    healer: p.team.HEALER,
+                    support: p.team.SUPPORT,
+                    assassin: p.team.ASSASSIN
+                };
             });
 
-            const avgStats = {};
-            for (let k in statTotals) {
-                avgStats[k] = parseFloat((statTotals[k] / 7).toFixed(2));
-            }
+            // Sort by total combat power & rating to determine winner
+            results.sort((a, b) => b.totalCombatPower - a.totalCombatPower);
+            const champion = results[0];
 
-            const names = Object.values(teamSlots).map(c => c.name);
-            let synergyBonus = 0;
-            const notes = [];
-
-            const hasJinwoo = names.includes("Sung Jinwoo");
-            const hasAshborn = names.includes("Ashborn");
-            const hasShadows = Object.values(teamSlots).some(c => ["Bellion", "Beru", "Igris", "Tusk", "Greed", "Iron", "Tank", "Kaisel", "Jima"].includes(c.name));
-            const hasHealer = Object.values(teamSlots).some(c => ["Min Byung-Gyu", "Lee Joohee", "Akari Shimizu", "Han Semi", "Jung Yerim"].includes(c.name));
-
-            if ((hasJinwoo || hasAshborn) && hasShadows) {
-                synergyBonus += 0.5;
-                notes.push("⚡ <strong>[Monarch's Dominion]</strong>: True Shadow Monarch presence + Shadow Army commanders grant +5% cohesion!");
-            }
-
-            if (hasHealer && names.includes("Min Byung-Gyu")) {
-                synergyBonus += 0.4;
-                notes.push("✨ <strong>[S-Rank Divine Blessing]</strong>: Min Byung-Gyu amplifies entire squad longevity and stat output!");
-            }
-
-            if (names.includes("Thomas Andre") && (hasJinwoo || names.includes("Liu Zhigang"))) {
-                synergyBonus += 0.3;
-                notes.push("🛡️ <strong>[Apex Hunter Coalition]</strong>: World top-tier frontline physical pressure established!");
-            }
-
-            if (notes.length === 0) {
-                notes.push("Balanced high-tier individual combat capability across all tactical roles.");
-            }
-
-            avgStats.synergy = Math.min(10.0, parseFloat((avgStats.synergy + synergyBonus).toFixed(2)));
-
-            const score = (
-                avgStats.raw_power * WEIGHTS.raw_power +
-                avgStats.hax * WEIGHTS.hax +
-                avgStats.speed * WEIGHTS.speed +
-                avgStats.durability * WEIGHTS.durability +
-                avgStats.synergy * WEIGHTS.synergy +
-                avgStats.battle_iq * WEIGHTS.battle_iq
-            ) * 10.0;
-
-            const finalScore = score.toFixed(1);
-
-            let verdict = "";
-            let verdictClass = "";
-            let hardestMatchup = "";
-
-            if (score >= 93.0) {
-                verdict = "WIN (SUPREME VICTORY)";
-                verdictClass = "verdict-win";
-                hardestMatchup = "Primordial War Incursion: Simultaneous assault by Absolute Being constructs & full Monarch Coalition.";
-            } else if (score >= 87.0) {
-                verdict = "WIN";
-                verdictClass = "verdict-win";
-                hardestMatchup = "Full Power Antares leading an army of Ancient Berserk Dragons with Monarch of White Flames.";
-            } else if (score >= 80.0) {
-                verdict = "EXTREMELY CLOSE";
-                verdictClass = "verdict-close";
-                hardestMatchup = "Monarch of Frost (Sillad) and Monarch of Fangs (Rakan) coordinated ambush.";
-            } else {
-                verdict = "LOSS / HIGH CASUALTY RISK";
-                verdictClass = "verdict-loss";
-                hardestMatchup = "Any high-tier Monarch awakening or Monarch-level gate boss.";
-            }
-
-            document.getElementById('finalScoreVal').innerText = `${finalScore}/100`;
-            const vBadge = document.getElementById('verdictBadge');
-            vBadge.innerText = verdict;
-            vBadge.className = `verdict-tag ${verdictClass}`;
-
-            const statsGrid = document.getElementById('statsBreakdownContainer');
-            statsGrid.innerHTML = `
-                ${renderStatBar("Raw Power (30%)", avgStats.raw_power)}
-                ${renderStatBar("Abilities/Hax (20%)", avgStats.hax)}
-                ${renderStatBar("Speed (15%)", avgStats.speed)}
-                ${renderStatBar("Durability (10%)", avgStats.durability)}
-                ${renderStatBar("Team Synergy (15%)", avgStats.synergy)}
-                ${renderStatBar("Battle IQ (10%)", avgStats.battle_iq)}
-            `;
-
-            document.getElementById('synergyNotesList').innerHTML = notes.map(n => `<div>${n}</div>`).join('');
-            document.getElementById('hardestMatchupText').innerText = hardestMatchup;
-
-            document.getElementById('resultsModal').classList.add('active');
-        }
-
-        function renderStatBar(label, value) {
-            const pct = Math.min(100, Math.round(value * 10));
-            return `
-                <div class="stat-bar-item">
-                    <div class="stat-bar-label">
-                        <span>${label}</span>
-                        <span style="color:var(--neon-blue); font-weight:700;">${value} / 10</span>
+            // Render Versus Summary Cards
+            results.forEach((res, rank) => {
+                const card = document.createElement('div');
+                card.className = `team-battle-card ${rank === 0 ? 'winner-glow' : ''}`;
+                card.innerHTML = `
+                    <span class="player-tag ${res.player.tagClass}">${res.player.name}</span>
+                    <div style="font-size:0.85rem; color:var(--text-muted); margin-top:4px;">👑 Leader: ${res.leader.name}</div>
+                    <div class="battle-score-num">${res.rating}/100</div>
+                    <div style="font-size:0.85rem; color:var(--gold); font-weight:700;">⚔️ Total Power: ${(res.totalCombatPower).toLocaleString()}</div>
+                    <div style="font-size:0.75rem; color:${rank === 0 ? 'var(--green)' : 'var(--text-muted)'}; font-weight:bold; margin-top:2px;">
+                        ${rank === 0 ? '🏆 1ST PLACE CHAMPION' : `#${rank + 1} CONTENDER`}
                     </div>
-                    <div class="stat-bar-track">
-                        <div class="stat-bar-fill" style="width: ${pct}%;"></div>
-                    </div>
+                `;
+                versusDisplay.appendChild(card);
+            });
+
+            // Simulate Round-by-Round Battle Logs
+            const logs = [
+                `⚔️ <strong>[ROUND 1: LEADER SOVEREIGN CLASH]</strong>: ${results.map(r => `${r.player.name}'s <strong>${r.leader.name}</strong>`).join(' clashes against ')}! Dimensional shockwaves tear open the arena skies.`,
+                `🔥 <strong>[ROUND 2: MAGE & ARTILLERY BOMBARDMENT]</strong>: ${results.map(r => `${r.player.name}'s <strong>${r.mage.name}</strong>`).join(' trades spells with ')} unleashing cataclysmic elemental vortexes!`,
+                `🗡️ <strong>[ROUND 3: ASSASSIN INFILTRATION]</strong>: ${results.map(r => `${r.player.name}'s <strong>${r.assassin.name}</strong>`).join(' maneuvers behind ')} executing vital stealth assassinations at supersonic speed.`,
+                `🛡️ <strong>[ROUND 4: VANGUARD & HEALER SUSTAIN]</strong>: ${results.map(r => `${r.player.name}'s <strong>${r.tank.name}</strong> & <strong>${r.healer.name}</strong>`).join(' establish defense against ')} providing impenetrable barriers and cellular regeneration.`,
+                `⚡ <strong>[DECISIVE SOVEREIGN MOMENT]</strong>: <strong>${champion.player.name}'s ${champion.leader.name}</strong> unleashes sovereign authority (${champion.leader.abilities[0]}), overwhelming rival squads with ${(champion.totalCombatPower).toLocaleString()} total combat power!`
+            ];
+
+            battleLogs.innerHTML = logs.map(l => `<div class="log-entry crit">${l}</div>`).join('');
+
+            // Champion Podium
+            championPodium.innerHTML = `
+                <div style="font-size: 2.2rem;">👑</div>
+                <div class="system-badge" style="background: rgba(255,209,102,0.2); border-color: var(--gold); color: var(--gold);">TOURNAMENT VICTOR</div>
+                <h2 style="font-family:'Cinzel', serif; font-size: 2.2rem; color: #fff;">${champion.player.name} WINS THE SOVEREIGN ARENA!</h2>
+                <div style="font-size: 1.1rem; color: var(--neon-blue); font-weight: 700;">Commanded by ${champion.leader.name} (${champion.leader.tier_category}-Tier)</div>
+                <div style="font-size: 0.95rem; color: #cbd5e1; max-width: 650px; line-height: 1.5; margin-top: 4px;">
+                    ${champion.player.name}'s squad achieved the highest dimensional combat rating of <strong>${champion.rating}/100</strong> and <strong>${champion.totalCombatPower.toLocaleString()}</strong> power, securing total victory across all combat positions.
                 </div>
             `;
+
+            setTimeout(() => {
+                playSfx('victory');
+            }, 300);
+
+            arenaModal.classList.add('active');
         }
 
         // Particle Canvas Background
@@ -2106,7 +1905,7 @@
         // Key Listeners
         window.addEventListener('keydown', (e) => {
             if (e.key === '.') {
-                if (currentDrawnCard === null) {
+                if (currentDrawnCard === null && !checkAllSquadsFilled()) {
                     drawCard();
                 }
             }
@@ -2114,7 +1913,7 @@
 
         // Initialize on load
         initParticles();
-        resetGame();
+        resetMultiplayerGame();
     </script>
 </body>
 </html>
