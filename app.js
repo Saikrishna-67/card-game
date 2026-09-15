@@ -582,6 +582,7 @@
     roleBtnsContainer.innerHTML = '';
 
     const currentSquad = activePlayer.squad;
+    let availableSlotsCount = 0;
 
     ROLES.forEach((role) => {
       const isEligible = char.eligible_roles && char.eligible_roles.includes(role.key);
@@ -591,15 +592,17 @@
       btn.type = 'button';
 
       if (isSlotOccupied) {
-        // Disabled: NO REPLACEMENT ALLOWED
+        // Disabled & locked: NO REPLACEMENT ALLOWED
         btn.disabled = true;
         btn.className = 'btn-assign-role';
         btn.style.opacity = '0.35';
         btn.style.cursor = 'not-allowed';
+        btn.style.pointerEvents = 'none';
         btn.style.borderColor = 'rgba(255,255,255,0.1)';
-        btn.innerHTML = `${role.icon} ${role.name} <span style="font-size:0.7rem; color:#94a3b8;">(Filled 🔒)</span>`;
+        btn.innerHTML = `${role.icon} ${role.name} <span style="font-size:0.7rem; color:#94a3b8;">(Occupied 🔒)</span>`;
       } else {
         // Open slot: can assign
+        availableSlotsCount++;
         btn.className = `btn-assign-role ${isEligible ? 'recommended' : ''}`;
         btn.innerHTML = `${role.icon} ${role.name} ${isEligible ? '⭐ (Best Fit)' : ''}`;
 
@@ -610,6 +613,16 @@
 
       roleBtnsContainer.appendChild(btn);
     });
+
+    if (availableSlotsCount === 0) {
+      const notice = document.createElement('div');
+      notice.style.gridColumn = '1 / -1';
+      notice.style.color = '#ffd166';
+      notice.style.fontSize = '0.85rem';
+      notice.style.padding = '0.4rem';
+      notice.innerHTML = '⚠️ All 7 squad positions are filled! You must discard this card.';
+      roleBtnsContainer.prepend(notice);
+    }
 
     modal.showModal();
   }
