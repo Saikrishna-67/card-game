@@ -164,6 +164,13 @@
     return '₹' + Number(val).toLocaleString('en-IN');
   }
 
+  function ensureArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'object') return Object.values(val);
+    return [];
+  }
+
   // --- 2. GLOBAL APP STATE ---
   const state = {
     universe: (typeof window.getActiveUniverse === 'function' ? window.getActiveUniverse() : 'sololeveling'),
@@ -1204,27 +1211,44 @@
 
   function updateHeaderStats() {
     const totalCountEl = document.getElementById('btn-total-count');
-    if (totalCountEl) totalCountEl.textContent = state.allCharacters.length;
+    if (totalCountEl) totalCountEl.textContent = (state.allCharacters || []).length;
 
     const pCountEl = document.getElementById('btn-player-count');
-    if (pCountEl) pCountEl.textContent = `${state.players.length}P`;
+    if (pCountEl) pCountEl.textContent = `${(state.players || []).length}P`;
 
     const remainingEl = document.getElementById('remaining-count');
-    if (remainingEl) remainingEl.textContent = state.pool.length;
+    if (remainingEl) remainingEl.textContent = ensureArray(state.pool).length;
 
     const totalPoolEl = document.getElementById('total-pool-count');
-    if (totalPoolEl) totalPoolEl.textContent = state.allCharacters.length;
+    if (totalPoolEl) totalPoolEl.textContent = (state.allCharacters || []).length;
 
     const vaultCountEl = document.getElementById('btn-vault-count');
-    if (vaultCountEl) vaultCountEl.textContent = state.archive.length;
+    if (vaultCountEl) vaultCountEl.textContent = ensureArray(state.archive).length;
   }
 
   function updateTurnHUD() {
-    const activePlayer = state.players[state.activePlayerIndex];
+    const playersList = ensureArray(state.players);
+    const activePlayer = playersList[state.activePlayerIndex] || playersList[0];
     const turnNameEl = document.getElementById('current-turn-name');
+    const localId = getOrSetLocalPlayerId();
+
     if (turnNameEl && activePlayer) {
-      if (!mpState.isOnline && state.isAuctionMode) {
-        turnNameEl.innerHTML = `<span style="color:var(--gold);">🔥 AUCTION BLOCK</span> — All Players Eligible to Bid!`;
+      if (mpState.isOnline) {
+        if (mpState.isAuctionMode) {
+          if (mpState.isHost) {
+            turnNameEl.innerHTML = `<span style="color:var(--gold);">👑 HOST PRIVILEGE</span> — Tap Deck to Summon Card to Auction Block!`;
+          } else {
+            turnNameEl.innerHTML = `<span style="color:var(--gold);">🔥 LIVE AUCTION ARENA</span> — Waiting for Host to Summon Next Card...`;
+          }
+        } else {
+          if (activePlayer.id === localId) {
+            turnNameEl.innerHTML = `<span style="color:var(--neon-blue);">⚡ YOUR TURN TO SUMMON</span> (${activePlayer.name})`;
+          } else {
+            turnNameEl.innerHTML = `⏳ <span style="color:${activePlayer.color};">${activePlayer.name}'s Turn</span> to Summon...`;
+          }
+        }
+      } else if (state.isAuctionMode) {
+        turnNameEl.innerHTML = `<span style="color:var(--gold);">🔥 OFFLINE AUCTION BLOCK</span> — All Players Bid! Tap Deck to Summon.`;
       } else {
         turnNameEl.textContent = activePlayer.name;
         turnNameEl.style.color = activePlayer.color;
@@ -1233,24 +1257,47 @@
 
     const dotEl = document.getElementById('turn-pulse-dot');
     if (dotEl && activePlayer) {
-      dotEl.style.backgroundColor = (!mpState.isOnline && state.isAuctionMode) ? '#ffd166' : activePlayer.color;
-      dotEl.style.boxShadow = `0 0 12px ${(!mpState.isOnline && state.isAuctionMode) ? '#ffd166' : activePlayer.color}`;
+      const isAuction = (state.isAuctionMode || (mpState.isOnline && mpState.isAuctionMode));
+      dotEl.style.backgroundColor = isAuction ? '#ffd166' : activePlayer.color;
+      dotEl.style.boxShadow = `0 0 12px ${isAuction ? '#ffd166' : activePlayer.color}`;
     }
 
-    // Update summon button text
+    // Update summon button text & hint
     const summonBtn = document.getElementById('summon-card-btn');
     if (summonBtn) {
       const uniConfig = getCurrentUniverseConfig();
-      if ((mpState.isOnline && mpState.isAuctionMode) || (!mpState.isOnline && state.isAuctionMode)) {
+      if (mpState.isOnline) {
+        if (mpState.isAuctionMode) {
+          if (mpState.isHost) {
+            summonBtn.innerHTML = `🔥 SUMMON TO AUCTION BLOCK 🃏`;
+            summonBtn.style.opacity = '1';
+            summonBtn.title = 'Summon a random card onto the live auction block for all players to bid!';
+          } else {
+            summonBtn.innerHTML = `⏳ WAITING FOR HOST TO SUMMON 🃏`;
+            summonBtn.style.opacity = '0.75';
+            summonBtn.title = 'In Online Auction Mode, the Room Host summons the cards onto the bidding block.';
+          }
+        } else {
+          if (activePlayer && activePlayer.id === localId) {
+            summonBtn.innerHTML = `⚡ YOUR TURN: SUMMON CARD 🃏`;
+            summonBtn.style.opacity = '1';
+          } else {
+            summonBtn.innerHTML = `⏳ WAITING FOR ${activePlayer ? activePlayer.name.toUpperCase() : 'PLAYER'}...`;
+            summonBtn.style.opacity = '0.75';
+          }
+        }
+      } else if (state.isAuctionMode) {
         summonBtn.innerHTML = `🔥 SUMMON TO AUCTION BLOCK 🃏`;
+        summonBtn.style.opacity = '1';
       } else {
         summonBtn.innerHTML = uniConfig.summonBtnText;
+        summonBtn.style.opacity = '1';
       }
     }
 
     updateHeaderStats();
 
-    state.players.forEach((p, idx) => {
+    playersList.forEach((p, idx) => {
       const cardEl = document.getElementById(`player-card-${p.id}`);
       if (cardEl) {
         if (!mpState.isOnline && state.isAuctionMode) {
@@ -1374,11 +1421,11 @@
     if (mpState.isOnline) {
       if (mpState.isAuctionMode) {
         if (!mpState.isHost) {
-          alert('⏳ In Auction Mode, only the Room Host can summon cards onto the auction block!');
+          alert('⏳ In Online Auction Mode, only the Room Host can summon cards onto the auction block!');
           return;
         }
       } else {
-        const activePlayer = state.players[state.activePlayerIndex];
+        const activePlayer = ensureArray(state.players)[state.activePlayerIndex];
         const localId = getOrSetLocalPlayerId();
         if (activePlayer && activePlayer.id !== localId && !mpState.isHost) {
           alert(`⏳ It is currently ${activePlayer.name}'s turn to summon a card!`);
@@ -1387,7 +1434,18 @@
       }
     }
 
-    if (state.pool.length === 0) {
+    // Ensure pool has valid cards
+    let poolList = ensureArray(state.pool);
+    if (poolList.length === 0) {
+      const activeUni = (mpState.isOnline && mpState.roomData?.universe) ? mpState.roomData.universe : state.universe;
+      const freshList = typeof window.getStoredCharacters === 'function'
+        ? window.getStoredCharacters(activeUni)
+        : (state.allCharacters && state.allCharacters.length ? state.allCharacters : (window.DEFAULT_SOLO_CHARACTERS || []));
+      state.pool = JSON.parse(JSON.stringify(freshList));
+      poolList = state.pool;
+    }
+
+    if (poolList.length === 0) {
       alert('⚡ The Dimensional Gate is empty! All characters have been drafted or auctioned.');
       return;
     }
@@ -1423,8 +1481,12 @@
 
     playSound('draw');
 
-    const randomIndex = Math.floor(Math.random() * state.pool.length);
-    const drawn = state.pool[randomIndex];
+    const randomIndex = Math.floor(Math.random() * poolList.length);
+    const drawn = poolList[randomIndex];
+    if (!drawn) {
+      alert('Error summoning card. Please try again.');
+      return;
+    }
     state.drawnCard = drawn;
 
     if (mpState.isOnline && mpState.roomRef) {
@@ -1724,22 +1786,22 @@
       }
 
       // Clone players and update target squad
-      const updatedPlayers = JSON.parse(JSON.stringify(state.players));
+      const updatedPlayers = JSON.parse(JSON.stringify(ensureArray(state.players)));
       const targetP = updatedPlayers.find(p => p.id === player.id);
       if (targetP) {
         if (!targetP.squad) targetP.squad = {};
         targetP.squad[roleKey] = char;
       }
 
-      const updatedPool = state.pool.filter(c => c.id !== char.id);
-      const updatedArchive = [...state.archive, {
+      const updatedPool = ensureArray(state.pool).filter(c => c.id !== char.id);
+      const updatedArchive = [...ensureArray(state.archive), {
         character: char,
         status: 'assigned',
         player: player.name,
         role: roleKey
       }];
 
-      const nextPlayerIndex = (state.activePlayerIndex + 1) % updatedPlayers.length;
+      const nextPlayerIndex = (state.activePlayerIndex + 1) % (updatedPlayers.length || 1);
       const allFilled = updatedPlayers.every(
         p => Object.keys(p.squad || {}).length >= state.maxPicksPerPlayer
       );
@@ -1818,14 +1880,15 @@
       }
 
       const char = state.drawnCard;
-      const updatedPool = state.pool.filter(c => c.id !== char.id);
-      const updatedArchive = [...state.archive, {
+      const updatedPool = ensureArray(state.pool).filter(c => c.id !== char.id);
+      const updatedArchive = [...ensureArray(state.archive), {
         character: char,
         status: 'discarded',
         player: activePlayer ? activePlayer.name : mpState.localPlayerName,
         role: 'None'
       }];
-      const nextPlayerIndex = (state.activePlayerIndex + 1) % state.players.length;
+      const playersList = ensureArray(state.players);
+      const nextPlayerIndex = (state.activePlayerIndex + 1) % (playersList.length || 1);
 
       playSound('discard');
       const modal = document.getElementById('character-modal');
@@ -1841,6 +1904,8 @@
     }
 
     // Offline mode
+    state.pool = ensureArray(state.pool);
+    state.archive = ensureArray(state.archive);
     const pIdx = state.pool.findIndex((c) => c.id === state.drawnCard.id);
     if (pIdx !== -1) {
       state.pool.splice(pIdx, 1);
@@ -3217,8 +3282,10 @@
 
     // Case 2: Unsold / Discarded to Void
     playSound('discard');
-    const updatedPool = (mpState.roomData.pool || []).filter(c => c.id !== auctionData.char.id);
-    const updatedArchive = [...(mpState.roomData.archive || []), {
+    const curPool = ensureArray(mpState.roomData?.pool || state.pool);
+    const updatedPool = curPool.filter(c => c.id !== auctionData.char.id);
+    const curArchive = ensureArray(mpState.roomData?.archive || state.archive);
+    const updatedArchive = [...curArchive, {
       character: auctionData.char,
       status: 'discarded',
       player: 'Auction Block (Unsold)',
@@ -3244,7 +3311,7 @@
       return;
     }
 
-    const updatedPlayers = JSON.parse(JSON.stringify(mpState.roomData.players || []));
+    const updatedPlayers = JSON.parse(JSON.stringify(ensureArray(mpState.roomData.players || state.players)));
     const targetPlayer = updatedPlayers.find(p => p.id === localId);
     if (targetPlayer) {
       if (!targetPlayer.squad) targetPlayer.squad = {};
@@ -3254,8 +3321,10 @@
     const updatedBudgets = JSON.parse(JSON.stringify(mpState.roomData.budgets || {}));
     updatedBudgets[localId] = Math.max(0, (updatedBudgets[localId] || 0) - auctionData.currentBid);
 
-    const updatedPool = (mpState.roomData.pool || []).filter(c => c.id !== auctionData.char.id);
-    const updatedArchive = [...(mpState.roomData.archive || []), {
+    const curPool = ensureArray(mpState.roomData?.pool || state.pool);
+    const updatedPool = curPool.filter(c => c.id !== auctionData.char.id);
+    const curArchive = ensureArray(mpState.roomData?.archive || state.archive);
+    const updatedArchive = [...curArchive, {
       character: auctionData.char,
       status: 'assigned',
       player: targetPlayer ? targetPlayer.name : mpState.localPlayerName,
@@ -3564,7 +3633,8 @@
 
     // Case 2: Unsold / Discarded to Void
     playSound('discard');
-    state.pool = state.pool.filter(c => c.id !== auctionData.char.id);
+    state.pool = ensureArray(state.pool).filter(c => c.id !== auctionData.char.id);
+    state.archive = ensureArray(state.archive);
     state.archive.push({
       character: auctionData.char,
       status: 'discarded',
@@ -3592,7 +3662,8 @@
     targetPlayer.squad[roleKey] = auctionData.char;
     targetPlayer.budget = Math.max(0, (targetPlayer.budget || 0) - auctionData.currentBid);
 
-    state.pool = state.pool.filter(c => c.id !== auctionData.char.id);
+    state.pool = ensureArray(state.pool).filter(c => c.id !== auctionData.char.id);
+    state.archive = ensureArray(state.archive);
     state.archive.push({
       character: auctionData.char,
       status: 'assigned',
@@ -3624,8 +3695,12 @@
   function launchOnlineMatch() {
     if (!mpState.isOnline || !mpState.roomRef || !mpState.isHost) return;
 
-    const charsList = state.allCharacters && state.allCharacters.length ? state.allCharacters : window.getStoredCharacters();
-    const cleanPlayers = (mpState.roomData?.players || []).map((p) => ({
+    const activeUni = mpState.roomData?.universe || state.universe || 'sololeveling';
+    const charsList = typeof window.getStoredCharacters === 'function'
+      ? window.getStoredCharacters(activeUni)
+      : (state.allCharacters && state.allCharacters.length ? state.allCharacters : (window.DEFAULT_SOLO_CHARACTERS || []));
+
+    const cleanPlayers = ensureArray(mpState.roomData?.players || state.players).map((p) => ({
       ...p,
       squad: {}
     }));
@@ -3659,7 +3734,7 @@
         if (mpState.isHost) {
           mpState.roomRef.remove();
         } else if (mpState.roomData && mpState.roomData.players) {
-          const remainingPlayers = mpState.roomData.players.filter((p) => p.id !== localId);
+          const remainingPlayers = ensureArray(mpState.roomData.players).filter((p) => p.id !== localId);
           mpState.roomRef.child('players').set(remainingPlayers);
         }
       }
