@@ -677,6 +677,7 @@
             <div>
               <label style="font-size: 0.75rem; color: var(--text-muted);">⏱️ Bid Timer:</label>
               <select id="mp-create-bid-timer" class="roster-filter-select" style="width: 100%; font-size: 0.82rem; padding: 0.35rem 0.5rem;">
+                <option value="0">Untimed / Unlimited Hammer 🔨</option>
                 <option value="10">10 Seconds</option>
                 <option value="15" selected>15 Seconds (Standard)</option>
                 <option value="20">20 Seconds</option>
@@ -728,12 +729,22 @@
           </div>
 
           <!-- Host Edit Controls (Enabled only for Host) -->
-          <div id="mp-lobby-host-edit-controls" style="display: none; grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; align-items: center;">
+          <div id="mp-lobby-host-edit-controls" style="display: none; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 0.5rem; align-items: center;">
             <div>
               <label style="font-size: 0.72rem; color: var(--text-muted);">Auction Mode:</label>
               <select id="mp-lobby-auction-toggle" class="roster-filter-select" style="width: 100%; font-size: 0.78rem; padding: 0.25rem 0.4rem;">
                 <option value="true">🔥 ON (Bidding)</option>
                 <option value="false">⚡ OFF (Turn Draft)</option>
+              </select>
+            </div>
+            <div>
+              <label style="font-size: 0.72rem; color: var(--text-muted);">Hammer Timer:</label>
+              <select id="mp-lobby-timer-select" class="roster-filter-select" style="width: 100%; font-size: 0.78rem; padding: 0.25rem 0.4rem;">
+                <option value="0">Untimed 🔨</option>
+                <option value="10">10s</option>
+                <option value="15" selected>15s</option>
+                <option value="20">20s</option>
+                <option value="30">30s</option>
               </select>
             </div>
             <div>

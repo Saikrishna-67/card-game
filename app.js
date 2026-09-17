@@ -1491,36 +1491,38 @@
 
     if (mpState.isOnline && mpState.roomRef) {
       if (mpState.isAuctionMode) {
-        const duration = mpState.bidTimerDuration || 15;
+        const rawDur = (mpState.roomData?.bidTimerDuration !== undefined) 
+          ? mpState.roomData.bidTimerDuration 
+          : (mpState.bidTimerDuration !== undefined ? mpState.bidTimerDuration : 15);
+        const duration = parseInt(rawDur, 10);
+        const isUntimed = (duration === 0);
         const startingBid = 5000;
-        setTimeout(() => {
-          mpState.roomRef.update({
-            currentAuction: {
-              active: true,
-              status: 'bidding',
-              char: drawn,
-              currentBid: startingBid,
-              highestBidderId: null,
-              highestBidderName: 'Starting Price (No Bids)',
-              highestBidderColor: '#ffd166',
-              expiresAt: Date.now() + duration * 1000,
-              duration: duration,
-              feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at ${formatINR(startingBid)}!`]
-            }
-          });
-        }, 350);
+        const expiresAt = isUntimed ? 0 : (Date.now() + duration * 1000);
+
+        mpState.roomRef.update({
+          currentAuction: {
+            active: true,
+            status: 'bidding',
+            char: drawn,
+            currentBid: startingBid,
+            highestBidderId: '',
+            highestBidderName: 'Starting Price (No Bids)',
+            highestBidderColor: '#ffd166',
+            expiresAt: expiresAt,
+            duration: isUntimed ? 0 : duration,
+            feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at ${formatINR(startingBid)}!`]
+          }
+        });
       } else {
-        const activeP = state.players[state.activePlayerIndex] || { id: mpState.localPlayerId, name: mpState.localPlayerName };
-        setTimeout(() => {
-          mpState.roomRef.update({
-            currentDraft: {
-              isOpen: true,
-              char: drawn,
-              drawerId: activeP.id,
-              drawerName: activeP.name
-            }
-          });
-        }, 350);
+        const activeP = ensureArray(state.players)[state.activePlayerIndex] || { id: mpState.localPlayerId, name: mpState.localPlayerName };
+        mpState.roomRef.update({
+          currentDraft: {
+            isOpen: true,
+            char: drawn,
+            drawerId: activeP.id,
+            drawerName: activeP.name
+          }
+        });
       }
     } else {
       if (state.isAuctionMode) {
@@ -1529,28 +1531,28 @@
           (p) => Object.keys(p.squad || {}).length < state.maxPicksPerPlayer
         );
         state.offlineActiveBidderIndex = firstEligibleIdx >= 0 ? firstEligibleIdx : 0;
-        const duration = state.bidTimerDuration !== undefined ? state.bidTimerDuration : 15;
+        const rawDur = state.bidTimerDuration !== undefined ? state.bidTimerDuration : 15;
+        const duration = parseInt(rawDur, 10);
+        const isUntimed = (duration === 0);
         const startingBid = 5000;
         state.currentAuction = {
           active: true,
           status: 'bidding',
           char: drawn,
           currentBid: startingBid,
-          highestBidderId: null,
+          highestBidderId: '',
           highestBidderName: 'Starting Price (No Bids)',
           highestBidderColor: '#ffd166',
           highestBidderIndex: null,
-          expiresAt: duration > 0 ? (Date.now() + duration * 1000) : null,
-          duration: duration,
+          expiresAt: isUntimed ? 0 : (Date.now() + duration * 1000),
+          duration: isUntimed ? 0 : duration,
           feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at ${formatINR(startingBid)}!`]
         };
-        setTimeout(() => {
-          syncOfflineAuctionModal();
-        }, 350);
+        syncOfflineAuctionModal();
       } else {
         setTimeout(() => {
           openCharacterRevealModal(drawn);
-        }, 350);
+        }, 300);
       }
     }
   }
@@ -2802,7 +2804,8 @@
       const modeBadge = document.getElementById('mp-lobby-mode-badge');
       if (modeBadge) {
         if (data.isAuctionMode) {
-          modeBadge.textContent = `🔥 AUCTION ON (${formatINR(data.startingBudget || 200000)})`;
+          const timerTxt = (data.bidTimerDuration === 0) ? 'Unlimited 🔨' : `${data.bidTimerDuration || 15}s`;
+          modeBadge.textContent = `🔥 AUCTION ON (${formatINR(data.startingBudget || 200000)} • ${timerTxt})`;
           modeBadge.style.display = 'inline-block';
         } else {
           modeBadge.textContent = '⚡ TURN DRAFT MODE';
@@ -2817,6 +2820,8 @@
           hostEditControls.style.display = 'grid';
           const auctionToggle = document.getElementById('mp-lobby-auction-toggle');
           if (auctionToggle) auctionToggle.value = data.isAuctionMode ? 'true' : 'false';
+          const timerSelect = document.getElementById('mp-lobby-timer-select');
+          if (timerSelect) timerSelect.value = (data.bidTimerDuration !== undefined) ? data.bidTimerDuration : 15;
           const budgetSelect = document.getElementById('mp-lobby-budget-select');
           if (budgetSelect) budgetSelect.value = data.startingBudget || 200000;
           const uniSelect = document.getElementById('mp-lobby-universe-select');
@@ -2978,19 +2983,21 @@
     const bestFitTagsContainer = document.getElementById('auction-best-fit-tags');
     if (bestFitTagsContainer) {
       bestFitTagsContainer.innerHTML = '';
-      const currentRoles = getRoles();
-      const eligible = char.eligible_roles || [];
-      if (eligible.length === 0) {
-        bestFitTagsContainer.innerHTML = `<span style="font-size:0.75rem; color:var(--text-muted);">All Squad Positions (+15% PWR)</span>`;
-      } else {
-        eligible.forEach((rKey) => {
-          const roleMeta = currentRoles.find((r) => r.key === rKey) || { icon: '⭐', name: rKey };
-          const chip = document.createElement('span');
-          chip.className = 'best-fit-tag-chip';
-          chip.innerHTML = `${roleMeta.icon} ${roleMeta.name} <strong style="color:#06d6a0;">+15%</strong>`;
-          bestFitTagsContainer.appendChild(chip);
-        });
+      const activeUni = (mpState.isOnline && mpState.roomData?.universe) ? mpState.roomData.universe : (char.universe || state.universe);
+      const uniConfig = UNIVERSE_CONFIGS[activeUni] || UNIVERSE_CONFIGS.sololeveling;
+      const currentRoles = uniConfig.roles || getRoles();
+      let eligible = char.eligible_roles;
+      if (!eligible || !Array.isArray(eligible) || eligible.length === 0) {
+        eligible = currentRoles.map(r => r.key);
       }
+
+      eligible.forEach((rKey) => {
+        const roleMeta = currentRoles.find((r) => r.key === rKey) || { icon: '⭐', name: rKey };
+        const chip = document.createElement('span');
+        chip.className = 'best-fit-tag-chip';
+        chip.innerHTML = `${roleMeta.icon} ${roleMeta.name} <strong style="color:#06d6a0;">+15%</strong>`;
+        bestFitTagsContainer.appendChild(chip);
+      });
     }
 
     // 6 Stat Meters
@@ -3049,8 +3056,13 @@
     roleBtns.innerHTML = '';
 
     const bestFitBanner = document.getElementById('auction-winner-best-fit-banner');
-    const currentRoles = getRoles();
-    const eligibleKeys = char.eligible_roles || [];
+    const activeUni = (mpState.isOnline && mpState.roomData?.universe) ? mpState.roomData.universe : (char.universe || state.universe);
+    const uniConfig = UNIVERSE_CONFIGS[activeUni] || UNIVERSE_CONFIGS.sololeveling;
+    const currentRoles = uniConfig.roles || getRoles();
+    let eligibleKeys = char.eligible_roles;
+    if (!eligibleKeys || !Array.isArray(eligibleKeys) || eligibleKeys.length === 0) {
+      eligibleKeys = currentRoles.map(r => r.key);
+    }
 
     if (bestFitBanner) {
       const bestFitNames = eligibleKeys.map(k => {
@@ -3116,7 +3128,7 @@
 
     const bidderNameEl = document.getElementById('auction-highest-bidder-name');
     if (bidderNameEl) {
-      bidderNameEl.textContent = auctionData.highestBidderName || 'No Bids Yet';
+      bidderNameEl.textContent = auctionData.highestBidderName || 'Starting Price (No Bids)';
       bidderNameEl.style.color = auctionData.highestBidderColor || '#ffd166';
     }
 
@@ -3127,23 +3139,35 @@
     const myBudgetElement = document.getElementById('auction-my-budget-val');
     if (myBudgetElement) myBudgetElement.textContent = formatINR(myBudgetVal);
 
-    // Live Countdown Timer
+    // Live Countdown Timer / Unlimited Hammer Support
     if (mpState.auctionLocalTimerInterval) {
       clearInterval(mpState.auctionLocalTimerInterval);
       mpState.auctionLocalTimerInterval = null;
     }
 
     function updateTimerDisplay() {
-      const remainingMs = Math.max(0, (auctionData.expiresAt || 0) - Date.now());
-      const remainingSec = (remainingMs / 1000).toFixed(1);
+      const isUntimed = !auctionData.duration || auctionData.duration === 0 || !auctionData.expiresAt;
       const timerSecEl = document.getElementById('auction-timer-sec');
       const timerBarEl = document.getElementById('auction-timer-bar');
+
+      if (isUntimed) {
+        if (timerSecEl) timerSecEl.textContent = 'Unlimited 🔨';
+        if (timerBarEl) {
+          timerBarEl.style.width = '100%';
+          timerBarEl.style.background = 'linear-gradient(90deg, #ffd166, #ff0054)';
+        }
+        return;
+      }
+
+      const remainingMs = Math.max(0, (auctionData.expiresAt || 0) - Date.now());
+      const remainingSec = (remainingMs / 1000).toFixed(1);
 
       if (timerSecEl) timerSecEl.textContent = `${remainingSec}s`;
       if (timerBarEl) {
         const totalDurationMs = (auctionData.duration || 15) * 1000;
         const pct = Math.min(100, (remainingMs / totalDurationMs) * 100);
         timerBarEl.style.width = `${pct}%`;
+        timerBarEl.style.background = 'linear-gradient(90deg, #06d6a0, #ffd166, #ff0054)';
       }
 
       if (remainingMs === 0 && auctionData.status === 'bidding' && mpState.isHost) {
@@ -3172,11 +3196,15 @@
       feedEl.scrollTop = feedEl.scrollHeight;
     }
 
-    // Host Controls Visibility
+    // Host Controls Visibility (Available in bidding mode for the host)
     const hostControls = document.getElementById('auction-host-controls');
     if (hostControls) {
       hostControls.style.display = (mpState.isHost && auctionData.status === 'bidding') ? 'block' : 'none';
     }
+
+    // Reset status message
+    const statusMsg = document.getElementById('auction-bid-status-msg');
+    if (statusMsg) statusMsg.textContent = '';
 
     // Handle Sold vs Bidding State
     const controlsSection = document.getElementById('bidding-controls-section');
@@ -3192,7 +3220,7 @@
         if (localId === auctionData.highestBidderId) {
           document.getElementById('auction-slot-instruction').innerHTML = '🎉 <strong>You won this card!</strong> Select which open squad position to permanently lock it into:';
 
-          const myPlayer = state.players.find(p => p.id === localId) || { squad: {} };
+          const myPlayer = ensureArray(state.players).find(p => p.id === localId) || { squad: {} };
           const mySquad = myPlayer.squad || {};
           renderAuctionWinnerRoleButtons(char, mySquad, (roleKey) => {
             assignAuctionWonCard(roleKey);
@@ -3219,9 +3247,23 @@
     }
 
     const localId = getOrSetLocalPlayerId();
-    const myBudget = (mpState.roomData.budgets && mpState.roomData.budgets[localId] !== undefined)
-      ? mpState.roomData.budgets[localId]
-      : (mpState.startingBudget || 200000);
+    const currentBudgets = mpState.roomData.budgets || {};
+    const myBudget = (currentBudgets[localId] !== undefined)
+      ? currentBudgets[localId]
+      : (mpState.roomData.startingBudget || 200000);
+
+    const playersList = ensureArray(mpState.roomData.players || state.players);
+    const myPlayer = playersList.find(p => p.id === localId) || {
+      id: localId,
+      name: mpState.localPlayerName || 'Hunter',
+      color: '#00d2ff',
+      squad: {}
+    };
+
+    if (Object.keys(myPlayer.squad || {}).length >= state.maxPicksPerPlayer) {
+      alert('Your squad is already 7/7 full!');
+      return;
+    }
 
     let newBid = 0;
     if (isCustom) {
@@ -3231,8 +3273,8 @@
       newBid = (auctionData.currentBid || 0) + increment;
     }
 
-    if (newBid <= auctionData.currentBid) {
-      alert(`Your bid must be higher than the current leading bid (${formatINR(auctionData.currentBid)})!`);
+    if (newBid <= (auctionData.currentBid || 0)) {
+      alert(`Your bid must be higher than the current leading bid (${formatINR(auctionData.currentBid || 5000)})!`);
       return;
     }
 
@@ -3241,14 +3283,10 @@
       return;
     }
 
-    const myPlayer = (mpState.roomData.players || []).find(p => p.id === localId) || {
-      name: mpState.localPlayerName,
-      color: '#00d2ff'
-    };
-
-    // Anti-snipe: extend expiration by 5 seconds if bid arrives near the end
-    const newExpiresAt = Math.max(auctionData.expiresAt, Date.now() + 5000);
-    const newFeed = [...(auctionData.feed || []), `💰 ${myPlayer.name} placed bid of ${formatINR(newBid)}!`].slice(-10);
+    const isUntimed = !auctionData.duration || auctionData.duration === 0 || !auctionData.expiresAt;
+    const newExpiresAt = isUntimed ? 0 : Math.max(auctionData.expiresAt || 0, Date.now() + 5000);
+    const feed = ensureArray(auctionData.feed);
+    const newFeed = [...feed, `💰 ${myPlayer.name} placed bid of ${formatINR(newBid)}!`].slice(-10);
 
     playSound('bid_placed');
 
@@ -3258,7 +3296,11 @@
       highestBidderName: myPlayer.name,
       highestBidderColor: myPlayer.color || '#00d2ff',
       expiresAt: newExpiresAt,
+      duration: isUntimed ? 0 : (auctionData.duration || 15),
       feed: newFeed
+    }).catch((err) => {
+      console.error('Bid failed:', err);
+      alert('Error placing bid: ' + err.message);
     });
   }
 
@@ -3268,10 +3310,16 @@
     const auctionData = mpState.roomData?.currentAuction;
     if (!auctionData) return;
 
+    if (manualSold && (!auctionData.highestBidderId || auctionData.highestBidderId === '')) {
+      alert('⚠️ No bids have been placed on this card yet! Wait for a player to place a bid, or click Pass/Discard.');
+      return;
+    }
+
     // Case 1: High Bidder Wins Card
     if (auctionData.highestBidderId && !manualPass) {
       playSound('gavel_sold');
-      const newFeed = [...(auctionData.feed || []), `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for ${formatINR(auctionData.currentBid)}!`];
+      const feed = ensureArray(auctionData.feed);
+      const newFeed = [...feed, `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for ${formatINR(auctionData.currentBid)}!`];
 
       mpState.roomRef.child('currentAuction').update({
         status: 'sold',
@@ -3437,12 +3485,16 @@
     }
 
     function updateOfflineTimerDisplay() {
+      const isUntimed = !auctionData.duration || auctionData.duration === 0 || !auctionData.expiresAt;
       const timerSecEl = document.getElementById('auction-timer-sec');
       const timerBarEl = document.getElementById('auction-timer-bar');
 
-      if (!auctionData.expiresAt) {
-        if (timerSecEl) timerSecEl.textContent = 'Untimed 🔨';
-        if (timerBarEl) timerBarEl.style.width = '100%';
+      if (isUntimed) {
+        if (timerSecEl) timerSecEl.textContent = 'Unlimited 🔨';
+        if (timerBarEl) {
+          timerBarEl.style.width = '100%';
+          timerBarEl.style.background = 'linear-gradient(90deg, #ffd166, #ff0054)';
+        }
         return;
       }
 
@@ -3454,6 +3506,7 @@
         const totalDurationMs = (auctionData.duration || 15) * 1000;
         const pct = Math.min(100, (remainingMs / totalDurationMs) * 100);
         timerBarEl.style.width = `${pct}%`;
+        timerBarEl.style.background = 'linear-gradient(90deg, #06d6a0, #ffd166, #ff0054)';
       }
 
       if (remainingMs === 0 && auctionData.status === 'bidding') {
@@ -3465,7 +3518,7 @@
       }
     }
     updateOfflineTimerDisplay();
-    if (auctionData.status === 'bidding' && auctionData.expiresAt) {
+    if (auctionData.status === 'bidding') {
       state.offlineTimerInterval = setInterval(updateOfflineTimerDisplay, 100);
     }
 
@@ -3545,8 +3598,8 @@
       newBid = (auctionData.currentBid || 0) + increment;
     }
 
-    if (newBid <= auctionData.currentBid) {
-      alert(`Your bid must be higher than the current leading bid (${formatINR(auctionData.currentBid)})!`);
+    if (newBid <= (auctionData.currentBid || 0)) {
+      alert(`Your bid must be higher than the current leading bid (${formatINR(auctionData.currentBid || 5000)})!`);
       return;
     }
 
@@ -3555,9 +3608,11 @@
       return;
     }
 
-    // Anti-snipe: extend timer by 5 seconds if bid arrives near the end
-    if (auctionData.expiresAt) {
-      auctionData.expiresAt = Math.max(auctionData.expiresAt, Date.now() + 5000);
+    const isUntimed = !auctionData.duration || auctionData.duration === 0 || !auctionData.expiresAt;
+    if (!isUntimed) {
+      auctionData.expiresAt = Math.max(auctionData.expiresAt || 0, Date.now() + 5000);
+    } else {
+      auctionData.expiresAt = 0;
     }
 
     auctionData.currentBid = newBid;
@@ -3565,7 +3620,8 @@
     auctionData.highestBidderName = currentBidder.name;
     auctionData.highestBidderColor = currentBidder.color || '#ffd166';
     auctionData.highestBidderIndex = state.offlineActiveBidderIndex;
-    auctionData.feed = [...(auctionData.feed || []), `💰 ${currentBidder.name} placed bid of ${formatINR(newBid)}!`].slice(-10);
+    const feed = ensureArray(auctionData.feed);
+    auctionData.feed = [...feed, `💰 ${currentBidder.name} placed bid of ${formatINR(newBid)}!`].slice(-10);
 
     playSound('bid_placed');
 
@@ -3589,7 +3645,8 @@
     if (!currentBidder) return;
 
     currentBidder.folded = true;
-    auctionData.feed = [...(auctionData.feed || []), `🏳️ ${currentBidder.name} folded from this auction.`].slice(-10);
+    const feed = ensureArray(auctionData.feed);
+    auctionData.feed = [...feed, `🏳️ ${currentBidder.name} folded from this auction.`].slice(-10);
     playSound('click');
 
     const statusMsg = document.getElementById('auction-bid-status-msg');
@@ -3603,6 +3660,11 @@
     if (remainingEligible.length === 0) {
       // Everyone folded
       resolveOfflineAuction();
+      return;
+    }
+
+    if (remainingEligible.length === 1 && remainingEligible[0].id === auctionData.highestBidderId) {
+      resolveOfflineAuction(true, false);
       return;
     }
 
@@ -3622,11 +3684,17 @@
       state.offlineTimerInterval = null;
     }
 
+    if (manualSold && (!auctionData.highestBidderId || auctionData.highestBidderId === '')) {
+      alert('⚠️ No bids have been placed on this card yet! Wait for a player to place a bid, or click Pass/Discard.');
+      return;
+    }
+
     // Case 1: High Bidder Wins Card
     if (auctionData.highestBidderId && !manualPass) {
       playSound('gavel_sold');
       auctionData.status = 'sold';
-      auctionData.feed = [...(auctionData.feed || []), `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for ${formatINR(auctionData.currentBid)}!`];
+      const feed = ensureArray(auctionData.feed);
+      auctionData.feed = [...feed, `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for ${formatINR(auctionData.currentBid)}!`];
       syncOfflineAuctionModal();
       return;
     }
@@ -3947,6 +4015,13 @@
       if (mpState.isOnline && mpState.isHost && mpState.roomRef) {
         const isAuction = (e.target.value === 'true');
         mpState.roomRef.update({ isAuctionMode: isAuction });
+        playSound('click');
+      }
+    });
+    document.getElementById('mp-lobby-timer-select')?.addEventListener('change', (e) => {
+      if (mpState.isOnline && mpState.isHost && mpState.roomRef) {
+        const timer = parseInt(e.target.value, 10);
+        mpState.roomRef.update({ bidTimerDuration: isNaN(timer) ? 15 : timer });
         playSound('click');
       }
     });
