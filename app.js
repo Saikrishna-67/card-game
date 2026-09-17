@@ -55,6 +55,53 @@
     theme: 'shadow'
   };
 
+  // --- 2.5 FIREBASE REALTIME MULTIPLAYER STATE ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDMi8s9teCm49wx4gLN0BTFDT0cJy59AfM",
+    authDomain: "anime-auction-22897.firebaseapp.com",
+    databaseURL: "https://anime-auction-22897-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "anime-auction-22897",
+    storageBucket: "anime-auction-22897.firebasestorage.app",
+    messagingSenderId: "801239974207",
+    appId: "1:801239974207:web:61e413fa5ec33846b0d38a"
+  };
+
+  const mpState = {
+    db: null,
+    roomCode: null,
+    roomRef: null,
+    isHost: false,
+    localPlayerId: null,
+    localPlayerName: 'Player',
+    isOnline: false,
+    roomData: null,
+    listenerAttached: false
+  };
+
+  function initFirebase() {
+    if (!mpState.db && typeof window.firebase !== 'undefined') {
+      try {
+        if (!firebase.apps || !firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        mpState.db = firebase.database();
+      } catch (err) {
+        console.warn('Firebase init error:', err);
+      }
+    }
+    return mpState.db;
+  }
+
+  function getOrSetLocalPlayerId() {
+    let id = sessionStorage.getItem('sl_player_id');
+    if (!id) {
+      id = 'p_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+      sessionStorage.setItem('sl_player_id', id);
+    }
+    mpState.localPlayerId = id;
+    return id;
+  }
+
   // --- 3. WEB AUDIO SYNTHESIZER & PROCEDURAL BGM DRONE ---
   let audioCtx = null;
   let bgmOsc1 = null;
@@ -461,7 +508,7 @@
           const effectivePower = calculateCharacterCombatPower(slotted, role.key);
 
           rolesHTML += `
-            <div class="role-slot-row filled" style="cursor:default;" title="Locked: ${slotted.name} (${role.name})">
+            <div class="role-slot-row filled" data-role="${role.key}" style="cursor:default;" title="Locked: ${slotted.name} (${role.name})">
               <div class="role-tag-name">
                 <span>${role.icon}</span> ${role.name}
               </div>
@@ -475,7 +522,7 @@
           `;
         } else {
           rolesHTML += `
-            <div class="role-slot-row" style="cursor:default;">
+            <div class="role-slot-row" data-role="${role.key}" style="cursor:default;">
               <div class="role-tag-name">
                 <span>${role.icon}</span> ${role.name}
               </div>
@@ -515,11 +562,49 @@
     });
   }
 
-  // --- 9. DRAW CARD & REVEAL FLOW (NO REPLACEMENTS PERMITTED) ---
+  // --- 9. DRAW CARD & REVEAL FLOW (STRICT PERMANENT DRAFT + ONLINE REAL-TIME SYNC) ---
   function drawRandomCard() {
+    if (mpState.isOnline) {
+      const activePlayer = state.players[state.activePlayerIndex];
+      const localId = getOrSetLocalPlayerId();
+      if (activePlayer && activePlayer.id !== localId && !mpState.isHost) {
+        alert(`⏳ It is currently ${activePlayer.name}'s turn to summon a hunter card!`);
+        return;
+      }
+    }
+
     if (state.pool.length === 0) {
       alert('⚡ The Dimensional Gate is empty! All hunters have been drafted.');
       return;
+    }
+
+    // Trigger 3D Summoning Card Launch Animation from Deck
+    const topCard = document.getElementById('deck-top-card');
+    if (topCard) {
+      topCard.classList.remove('summoning-active');
+      void topCard.offsetWidth; // Force reflow
+      topCard.classList.add('summoning-active');
+      setTimeout(() => {
+        topCard.classList.remove('summoning-active');
+      }, 750);
+    }
+
+    // Trigger Magic Summoning Circle Overdrive
+    const magicCircle = document.getElementById('magic-summon-circle');
+    if (magicCircle) {
+      magicCircle.classList.remove('circle-overdrive');
+      void magicCircle.offsetWidth;
+      magicCircle.classList.add('circle-overdrive');
+      setTimeout(() => magicCircle.classList.remove('circle-overdrive'), 800);
+    }
+
+    // Trigger Fullscreen Shockwave Flash
+    const shockwave = document.getElementById('summon-shockwave-overlay');
+    if (shockwave) {
+      shockwave.classList.remove('active');
+      void shockwave.offsetWidth;
+      shockwave.classList.add('active');
+      setTimeout(() => shockwave.classList.remove('active'), 600);
     }
 
     playSound('draw');
@@ -528,25 +613,103 @@
     const drawn = state.pool[randomIndex];
     state.drawnCard = drawn;
 
-    openCharacterRevealModal(drawn);
+    if (mpState.isOnline && mpState.roomRef) {
+      const activeP = state.players[state.activePlayerIndex] || { id: mpState.localPlayerId, name: mpState.localPlayerName };
+      setTimeout(() => {
+        mpState.roomRef.update({
+          currentDraft: {
+            isOpen: true,
+            char: drawn,
+            drawerId: activeP.id,
+            drawerName: activeP.name
+          }
+        });
+      }, 350);
+    } else {
+      setTimeout(() => {
+        openCharacterRevealModal(drawn);
+      }, 350);
+    }
   }
 
-  function openCharacterRevealModal(char) {
+  function openCharacterRevealModal(char, drawerId = null, drawerName = null) {
     const modal = document.getElementById('character-modal');
     if (!modal) return;
 
-    if (char.tier_category === 'SSS') playSound('rank_sss');
+    const isGodTier = char.tier_category === 'SSS' || char.tier_category === 'SS';
+    if (isGodTier) playSound('rank_sss');
 
-    const activePlayer = state.players[state.activePlayerIndex];
+    const activePlayer = state.players[state.activePlayerIndex] || { squad: {}, name: 'Active Player', id: 'p1' };
+    const currentDrawerId = drawerId || activePlayer.id;
+    const currentDrawerName = drawerName || activePlayer.name;
+
+    const localId = getOrSetLocalPlayerId();
+    const isMyTurn = !mpState.isOnline || (localId === currentDrawerId);
+
+    // Monarch Aura & System Tag Update
+    const flamesEl = document.getElementById('monarch-aura-flames');
+    if (flamesEl) {
+      if (isGodTier) flamesEl.classList.add('active-monarch');
+      else flamesEl.classList.remove('active-monarch');
+    }
+
+    const sysTag = document.getElementById('reveal-system-tag');
+    if (sysTag) {
+      if (char.tier_category === 'SSS') sysTag.textContent = '👑 [ SYSTEM: GOD TIER ENTITY DETECTED ]';
+      else if (char.tier_category === 'SS') sysTag.textContent = '⚔️ [ SYSTEM: MONARCH / RULER DETECTED ]';
+      else sysTag.textContent = '✨ [ SYSTEM: HUNTER SUMMON REVEALED ]';
+    }
 
     const rankEl = document.getElementById('reveal-rank');
     rankEl.textContent = char.tier;
-    rankEl.className = `reveal-rank-banner tier-${char.tier_category.toLowerCase().replace('+', 'plus')}`;
+    rankEl.className = `reveal-rank-banner tier-${(char.tier_category || 'A').toLowerCase().replace('+', 'plus')}`;
 
     document.getElementById('reveal-avatar-symbol').textContent = char.symbol || '⚔️';
     document.getElementById('reveal-name').textContent = char.name;
-    document.getElementById('reveal-title').textContent = char.title || char.role;
-    document.getElementById('reveal-power-num').textContent = `⚡ ${char.power_number.toLocaleString()} PWR (PL: ${char.power_level})`;
+    document.getElementById('reveal-title').textContent = char.title || char.role || 'Hunter';
+
+    // 3D Interactive Mouse Tilt & Holographic Foil Reflection
+    const innerCard = document.getElementById('hologram-card-inner');
+    const foilOverlay = document.getElementById('hologram-foil-overlay');
+    if (innerCard) {
+      innerCard.onmousemove = (e) => {
+        const rect = innerCard.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        const rotateX = (-y / rect.height) * 18;
+        const rotateY = (x / rect.width) * 18;
+        innerCard.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.02)`;
+        if (foilOverlay) {
+          const bgX = (e.clientX - rect.left) / rect.width * 100;
+          const bgY = (e.clientY - rect.top) / rect.height * 100;
+          foilOverlay.style.backgroundPosition = `${bgX}% ${bgY}%`;
+          foilOverlay.style.opacity = '0.75';
+        }
+      };
+      innerCard.onmouseleave = () => {
+        innerCard.style.transform = 'perspective(1000px) rotateX(0deg) rotateY(0deg) scale(1)';
+        if (foilOverlay) foilOverlay.style.opacity = '0.45';
+      };
+    }
+
+    // Animated rolling counter for power number
+    const targetPower = char.power_number || 100000;
+    const powerNumEl = document.getElementById('reveal-power-num');
+    if (powerNumEl) {
+      const startTime = performance.now();
+      const duration = 650;
+      function animatePower(now) {
+        const elapsed = now - startTime;
+        const progress = Math.min(1, elapsed / duration);
+        const easeOut = 1 - Math.pow(1 - progress, 3);
+        const currentVal = Math.round(targetPower * easeOut);
+        powerNumEl.textContent = `⚡ ${currentVal.toLocaleString()} PWR (PL: ${char.power_level || 50})`;
+        if (progress < 1) {
+          requestAnimationFrame(animatePower);
+        }
+      }
+      requestAnimationFrame(animatePower);
+    }
 
     const stats = char.stats || {
       raw_power: 8,
@@ -573,15 +736,19 @@
       document.getElementById('bar-battle-iq').style.width = `${stats.battle_iq * 10}%`;
     }, 50);
 
-    document.getElementById('reveal-desc').textContent = char.description;
-    document.getElementById('reveal-feats').textContent = `🏆 Feats: ${char.feats}`;
+    document.getElementById('reveal-desc').textContent = char.description || '';
+    document.getElementById('reveal-feats').textContent = `🏆 Feats: ${char.feats || 'Canon combat achievements.'}`;
     document.getElementById('reveal-quote').textContent = `"${char.quote || 'Arise.'}"`;
 
     // Role assignment buttons for active player (STRICT NO REPLACEMENT RULE)
     const roleBtnsContainer = document.getElementById('reveal-role-buttons');
     roleBtnsContainer.innerHTML = '';
 
-    const currentSquad = activePlayer.squad;
+    const drawerPlayer = (mpState.isOnline
+      ? state.players.find(p => p.id === currentDrawerId)
+      : activePlayer) || activePlayer;
+    const currentSquad = (drawerPlayer && drawerPlayer.squad) ? drawerPlayer.squad : {};
+
     let availableSlotsCount = 0;
 
     ROLES.forEach((role) => {
@@ -591,7 +758,14 @@
       const btn = document.createElement('button');
       btn.type = 'button';
 
-      if (isSlotOccupied) {
+      if (!isMyTurn) {
+        btn.disabled = true;
+        btn.className = 'btn-assign-role';
+        btn.style.opacity = '0.45';
+        btn.style.cursor = 'not-allowed';
+        btn.style.pointerEvents = 'none';
+        btn.innerHTML = `${role.icon} ${role.name} ${isSlotOccupied ? '🔒' : ''}`;
+      } else if (isSlotOccupied) {
         // Disabled & locked: NO REPLACEMENT ALLOWED
         btn.disabled = true;
         btn.className = 'btn-assign-role';
@@ -607,14 +781,29 @@
         btn.innerHTML = `${role.icon} ${role.name} ${isEligible ? '⭐ (Best Fit)' : ''}`;
 
         btn.addEventListener('click', () => {
-          assignCardToRole(activePlayer, role.key, char);
+          assignCardToRole(drawerPlayer, role.key, char);
         });
       }
 
       roleBtnsContainer.appendChild(btn);
     });
 
-    if (availableSlotsCount === 0) {
+    const discardBtn = document.getElementById('btn-discard-card');
+    if (discardBtn) {
+      if (!isMyTurn) {
+        discardBtn.disabled = true;
+        discardBtn.style.opacity = '0.4';
+        discardBtn.style.pointerEvents = 'none';
+        discardBtn.textContent = `⏳ Spectating: Waiting for ${currentDrawerName} to choose...`;
+      } else {
+        discardBtn.disabled = false;
+        discardBtn.style.opacity = '1';
+        discardBtn.style.pointerEvents = 'auto';
+        discardBtn.textContent = '🗑️ Discard / Disperse to Void (Cannot Be Drawn Again)';
+      }
+    }
+
+    if (isMyTurn && availableSlotsCount === 0) {
       const notice = document.createElement('div');
       notice.style.gridColumn = '1 / -1';
       notice.style.color = '#ffd166';
@@ -622,21 +811,72 @@
       notice.style.padding = '0.4rem';
       notice.innerHTML = '⚠️ All 7 squad positions are filled! You must discard this card.';
       roleBtnsContainer.prepend(notice);
+    } else if (!isMyTurn) {
+      const notice = document.createElement('div');
+      notice.style.gridColumn = '1 / -1';
+      notice.style.color = 'var(--neon-blue)';
+      notice.style.fontSize = '0.85rem';
+      notice.style.padding = '0.4rem';
+      notice.innerHTML = `👁️ Spectator Mode: Live reveal for <strong>${currentDrawerName}</strong>`;
+      roleBtnsContainer.prepend(notice);
     }
 
     modal.showModal();
   }
 
   function assignCardToRole(player, roleKey, char) {
-    // Strict safeguard: cannot overwrite occupied slot
-    if (player.squad[roleKey]) {
+    if (player.squad && player.squad[roleKey]) {
       alert('This slot is already filled! No replacements allowed.');
       return;
     }
 
+    if (mpState.isOnline && mpState.roomRef) {
+      const localId = getOrSetLocalPlayerId();
+      if (player.id !== localId && !mpState.isHost) {
+        alert("Only the active summoner can assign this card!");
+        return;
+      }
+
+      // Clone players and update target squad
+      const updatedPlayers = JSON.parse(JSON.stringify(state.players));
+      const targetP = updatedPlayers.find(p => p.id === player.id);
+      if (targetP) {
+        if (!targetP.squad) targetP.squad = {};
+        targetP.squad[roleKey] = char;
+      }
+
+      const updatedPool = state.pool.filter(c => c.id !== char.id);
+      const updatedArchive = [...state.archive, {
+        character: char,
+        status: 'assigned',
+        player: player.name,
+        role: roleKey
+      }];
+
+      const nextPlayerIndex = (state.activePlayerIndex + 1) % updatedPlayers.length;
+      const allFilled = updatedPlayers.every(
+        p => Object.keys(p.squad || {}).length >= state.maxPicksPerPlayer
+      );
+
+      playSound('assign');
+      const modal = document.getElementById('character-modal');
+      if (modal && modal.open) modal.close();
+
+      mpState.roomRef.update({
+        players: updatedPlayers,
+        pool: updatedPool,
+        archive: updatedArchive,
+        currentDraft: null,
+        currentPlayerIndex: nextPlayerIndex,
+        status: allFilled ? 'completed' : 'drafting'
+      });
+      return;
+    }
+
+    // Offline mode
+    if (!player.squad) player.squad = {};
     player.squad[roleKey] = char;
 
-    // Permanently consume from active pool (Strict No-Repetition, No Backup)
     const pIdx = state.pool.findIndex((c) => c.id === char.id);
     if (pIdx !== -1) {
       state.pool.splice(pIdx, 1);
@@ -652,14 +892,22 @@
     playSound('assign');
 
     const modal = document.getElementById('character-modal');
-    if (modal) modal.close();
+    if (modal && modal.open) modal.close();
 
     renderPlayersDock();
     updateTurnHUD();
 
+    // Trigger visual slot lock animation
+    setTimeout(() => {
+      const slotRow = document.querySelector(`#player-card-${player.id} [data-role="${roleKey}"]`);
+      if (slotRow) {
+        slotRow.classList.add('slot-just-assigned');
+        setTimeout(() => slotRow.classList.remove('slot-just-assigned'), 1000);
+      }
+    }, 50);
+
     checkDraftCompletion();
 
-    // Advance turn to next player
     state.activePlayerIndex = (state.activePlayerIndex + 1) % state.players.length;
     updateTurnHUD();
   }
@@ -667,7 +915,38 @@
   function discardCard() {
     if (!state.drawnCard) return;
 
-    // Permanently remove from pool (No Backup)
+    if (mpState.isOnline && mpState.roomRef) {
+      const activePlayer = state.players[state.activePlayerIndex];
+      const localId = getOrSetLocalPlayerId();
+      if (activePlayer && activePlayer.id !== localId && !mpState.isHost) {
+        alert("Only the active summoner can discard this card!");
+        return;
+      }
+
+      const char = state.drawnCard;
+      const updatedPool = state.pool.filter(c => c.id !== char.id);
+      const updatedArchive = [...state.archive, {
+        character: char,
+        status: 'discarded',
+        player: activePlayer ? activePlayer.name : mpState.localPlayerName,
+        role: 'None'
+      }];
+      const nextPlayerIndex = (state.activePlayerIndex + 1) % state.players.length;
+
+      playSound('discard');
+      const modal = document.getElementById('character-modal');
+      if (modal && modal.open) modal.close();
+
+      mpState.roomRef.update({
+        pool: updatedPool,
+        archive: updatedArchive,
+        currentDraft: null,
+        currentPlayerIndex: nextPlayerIndex
+      });
+      return;
+    }
+
+    // Offline mode
     const pIdx = state.pool.findIndex((c) => c.id === state.drawnCard.id);
     if (pIdx !== -1) {
       state.pool.splice(pIdx, 1);
@@ -684,7 +963,7 @@
     playSound('discard');
 
     const modal = document.getElementById('character-modal');
-    if (modal) modal.close();
+    if (modal && modal.open) modal.close();
 
     updateTurnHUD();
 
@@ -694,7 +973,7 @@
 
   function checkDraftCompletion() {
     const allFilled = state.players.every(
-      (p) => Object.keys(p.squad).length >= state.maxPicksPerPlayer
+      (p) => Object.keys(p.squad || {}).length >= state.maxPicksPerPlayer
     );
 
     if (allFilled) {
@@ -1247,14 +1526,408 @@
     modal.showModal();
   }
 
+  // --- 15.5 ONLINE MULTIPLAYER ROOM ENGINE ---
+  function openMultiplayerModal() {
+    const modal = document.getElementById('multiplayer-modal');
+    if (!modal) return;
+
+    initFirebase();
+    getOrSetLocalPlayerId();
+
+    if (mpState.isOnline && mpState.roomData && mpState.roomData.status === 'lobby') {
+      showMpTab('mp-lobby-panel');
+    } else {
+      showMpTab('mp-main-panel');
+    }
+
+    modal.showModal();
+    playSound('click');
+  }
+
+  function showMpTab(panelId) {
+    document.querySelectorAll('.mp-tab-panel').forEach((panel) => {
+      panel.classList.remove('active');
+    });
+    const target = document.getElementById(panelId);
+    if (target) target.classList.add('active');
+  }
+
+  function generateRoomCode() {
+    const chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+    let code = '';
+    for (let i = 0; i < 4; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return `SL-${code}`;
+  }
+
+  function createOnlineRoom() {
+    const db = initFirebase();
+    if (!db) {
+      alert('Unable to connect to Firebase Realtime Database. Please check your internet connection.');
+      return;
+    }
+
+    const hostNameInput = document.getElementById('mp-host-name-input');
+    const hostName = (hostNameInput && hostNameInput.value.trim()) || 'Ahjin Guild Master (Host)';
+    const maxPlayers = parseInt(document.getElementById('mp-host-max-players')?.value, 10) || 4;
+
+    const localId = getOrSetLocalPlayerId();
+    mpState.localPlayerName = hostName;
+
+    const roomCode = generateRoomCode();
+    const charsList = state.allCharacters && state.allCharacters.length ? state.allCharacters : window.getStoredCharacters();
+
+    const initialRoomData = {
+      code: roomCode,
+      status: 'lobby',
+      createdAt: Date.now(),
+      hostId: localId,
+      maxPlayers: maxPlayers,
+      currentPlayerIndex: 0,
+      players: [
+        {
+          id: localId,
+          name: hostName,
+          color: PLAYER_COLORS[0],
+          squad: {},
+          isHost: true
+        }
+      ],
+      pool: JSON.parse(JSON.stringify(charsList)),
+      archive: [],
+      currentDraft: null,
+      battleState: null
+    };
+
+    const roomRef = db.ref(`rooms/${roomCode}`);
+    roomRef.set(initialRoomData).then(() => {
+      attachRoomListener(roomCode, true);
+      showMpTab('mp-lobby-panel');
+      playSound('rank_sss');
+    }).catch((err) => {
+      alert('Failed to create room: ' + err.message);
+    });
+  }
+
+  function joinOnlineRoom(rawCode, rawName) {
+    const db = initFirebase();
+    if (!db) {
+      alert('Unable to connect to Firebase Realtime Database. Please check your internet connection.');
+      return;
+    }
+
+    const code = (rawCode || '').trim().toUpperCase();
+    const errorEl = document.getElementById('mp-join-error');
+    if (errorEl) errorEl.style.display = 'none';
+
+    if (!code) {
+      if (errorEl) {
+        errorEl.textContent = 'Please enter a valid room code (e.g. SL-8849).';
+        errorEl.style.display = 'block';
+      }
+      return;
+    }
+
+    const localId = getOrSetLocalPlayerId();
+    const joinName = (rawName || '').trim() || `Hunter ${Math.floor(Math.random() * 899 + 100)}`;
+    mpState.localPlayerName = joinName;
+
+    const roomRef = db.ref(`rooms/${code}`);
+    roomRef.once('value').then((snapshot) => {
+      const room = snapshot.val();
+      if (!room) {
+        if (errorEl) {
+          errorEl.textContent = `Room ${code} was not found. Please verify the code.`;
+          errorEl.style.display = 'block';
+        }
+        return;
+      }
+
+      const players = room.players || [];
+      const existingIdx = players.findIndex((p) => p.id === localId);
+
+      if (room.status !== 'lobby' && existingIdx === -1) {
+        if (errorEl) {
+          errorEl.textContent = 'This match is already in progress and not accepting new players.';
+          errorEl.style.display = 'block';
+        }
+        return;
+      }
+
+      if (existingIdx === -1) {
+        if (players.length >= (room.maxPlayers || 8)) {
+          if (errorEl) {
+            errorEl.textContent = `Room is already full (${players.length}/${room.maxPlayers} players).`;
+            errorEl.style.display = 'block';
+          }
+          return;
+        }
+
+        players.push({
+          id: localId,
+          name: joinName,
+          color: PLAYER_COLORS[players.length % PLAYER_COLORS.length],
+          squad: {},
+          isHost: false
+        });
+
+        roomRef.child('players').set(players);
+      }
+
+      attachRoomListener(code, room.hostId === localId);
+      showMpTab('mp-lobby-panel');
+      playSound('click');
+    }).catch((err) => {
+      if (errorEl) {
+        errorEl.textContent = 'Join error: ' + err.message;
+        errorEl.style.display = 'block';
+      }
+    });
+  }
+
+  function attachRoomListener(code, isHost) {
+    if (mpState.roomRef) {
+      mpState.roomRef.off();
+    }
+
+    mpState.roomCode = code;
+    mpState.isHost = isHost;
+    mpState.isOnline = true;
+    mpState.roomRef = mpState.db.ref(`rooms/${code}`);
+
+    // Update URL bar
+    const url = new URL(window.location.href);
+    url.searchParams.set('room', code);
+    window.history.replaceState({}, '', url.toString());
+
+    // Update Header status dot
+    const dot = document.getElementById('mp-header-status-dot');
+    if (dot) dot.classList.add('online');
+
+    mpState.roomRef.on('value', handleRemoteRoomUpdate);
+  }
+
+  function handleRemoteRoomUpdate(snapshot) {
+    const data = snapshot.val();
+    if (!data) {
+      if (mpState.isOnline) {
+        alert('The room has ended or was closed by the host.');
+        leaveOnlineRoom(false);
+      }
+      return;
+    }
+
+    mpState.roomData = data;
+    const localId = getOrSetLocalPlayerId();
+    const isLocalHost = (data.hostId === localId);
+    mpState.isHost = isLocalHost;
+
+    // --- A. LOBBY STATE ---
+    if (data.status === 'lobby') {
+      document.getElementById('mp-lobby-code-text').textContent = data.code;
+      const countEl = document.getElementById('mp-lobby-player-count');
+      if (countEl) countEl.textContent = `${(data.players || []).length} / ${data.maxPlayers || 4} Players`;
+
+      const grid = document.getElementById('mp-lobby-players-grid');
+      if (grid) {
+        grid.innerHTML = '';
+        (data.players || []).forEach((p, idx) => {
+          const chip = document.createElement('div');
+          chip.className = 'lobby-player-chip';
+          chip.innerHTML = `
+            <div class="lobby-player-info">
+              <span class="player-color-dot" style="background:${p.color}; box-shadow:0 0 8px ${p.color};"></span>
+              <span>${p.name} ${p.isHost ? '👑 (Host)' : ''}</span>
+              ${p.id === localId ? '<span class="lobby-player-tag-you">YOU</span>' : ''}
+            </div>
+            <span style="font-size:0.75rem; color:var(--text-muted);">Slot #${idx + 1}</span>
+          `;
+          grid.appendChild(chip);
+        });
+      }
+
+      const startBtn = document.getElementById('mp-lobby-start-btn');
+      const waitMsg = document.getElementById('mp-lobby-waiting-msg');
+      if (isLocalHost) {
+        if (startBtn) startBtn.style.display = 'block';
+        if (waitMsg) waitMsg.style.display = 'none';
+      } else {
+        if (startBtn) startBtn.style.display = 'none';
+        if (waitMsg) waitMsg.style.display = 'inline-block';
+      }
+      return;
+    }
+
+    // --- B. DRAFTING STATE ---
+    if (data.status === 'drafting') {
+      const mpModal = document.getElementById('multiplayer-modal');
+      if (mpModal && mpModal.open) mpModal.close();
+
+      const activeBar = document.getElementById('active-room-bar');
+      if (activeBar) activeBar.style.display = 'flex';
+
+      document.getElementById('active-room-code-display').textContent = data.code;
+      const myPlayer = (data.players || []).find((p) => p.id === localId);
+      document.getElementById('active-room-player-name').textContent = myPlayer ? myPlayer.name : 'You';
+      document.getElementById('active-room-role-badge').textContent = isLocalHost ? '👑 HOST' : '⚔️ GUILD';
+      document.getElementById('active-room-player-count').textContent = `${(data.players || []).length} Players Online`;
+
+      // Sync state
+      state.players = data.players || [];
+      state.pool = data.pool || [];
+      state.archive = data.archive || [];
+      state.activePlayerIndex = data.currentPlayerIndex || 0;
+
+      renderPlayersDock();
+      updateTurnHUD();
+
+      // Synchronize 3D Card Reveal Modal
+      const charModal = document.getElementById('character-modal');
+      if (data.currentDraft && data.currentDraft.isOpen && data.currentDraft.char) {
+        state.drawnCard = data.currentDraft.char;
+        openCharacterRevealModal(data.currentDraft.char, data.currentDraft.drawerId, data.currentDraft.drawerName);
+      } else {
+        if (charModal && charModal.open) {
+          charModal.close();
+        }
+      }
+      return;
+    }
+
+    // --- C. COMPLETED STATE ---
+    if (data.status === 'completed') {
+      state.players = data.players || [];
+      state.archive = data.archive || [];
+      renderPlayersDock();
+      updateTurnHUD();
+
+      const charModal = document.getElementById('character-modal');
+      if (charModal && charModal.open) charModal.close();
+
+      const vicModal = document.getElementById('victory-modal');
+      if (vicModal && !vicModal.open) {
+        openVictoryModal();
+      }
+    }
+  }
+
+  function launchOnlineMatch() {
+    if (!mpState.isOnline || !mpState.roomRef || !mpState.isHost) return;
+
+    const charsList = state.allCharacters && state.allCharacters.length ? state.allCharacters : window.getStoredCharacters();
+    const cleanPlayers = (mpState.roomData?.players || []).map((p) => ({
+      ...p,
+      squad: {}
+    }));
+
+    mpState.roomRef.update({
+      status: 'drafting',
+      pool: JSON.parse(JSON.stringify(charsList)),
+      archive: [],
+      currentDraft: null,
+      currentPlayerIndex: 0,
+      players: cleanPlayers
+    });
+
+    playSound('victory');
+  }
+
+  function leaveOnlineRoom(removeFromDb = true) {
+    if (mpState.roomRef) {
+      mpState.roomRef.off();
+
+      if (removeFromDb) {
+        const localId = getOrSetLocalPlayerId();
+        if (mpState.isHost) {
+          mpState.roomRef.remove();
+        } else if (mpState.roomData && mpState.roomData.players) {
+          const remainingPlayers = mpState.roomData.players.filter((p) => p.id !== localId);
+          mpState.roomRef.child('players').set(remainingPlayers);
+        }
+      }
+
+      mpState.roomRef = null;
+    }
+
+    mpState.isOnline = false;
+    mpState.roomCode = null;
+    mpState.roomData = null;
+
+    const activeBar = document.getElementById('active-room-bar');
+    if (activeBar) activeBar.style.display = 'none';
+
+    const dot = document.getElementById('mp-header-status-dot');
+    if (dot) dot.classList.remove('online');
+
+    const mpModal = document.getElementById('multiplayer-modal');
+    if (mpModal && mpModal.open) mpModal.close();
+
+    // Clean URL
+    const url = new URL(window.location.href);
+    url.searchParams.delete('room');
+    window.history.replaceState({}, '', url.pathname);
+
+    initGame(2);
+    playSound('click');
+  }
+
+  function copyRoomLink() {
+    if (!mpState.roomCode) return;
+    const url = `${window.location.origin}${window.location.pathname}?room=${mpState.roomCode}`;
+    navigator.clipboard.writeText(url).then(() => {
+      const btn = document.getElementById('mp-copy-link-btn');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied Link! ✅';
+        setTimeout(() => (btn.textContent = orig), 2000);
+      }
+      playSound('click');
+    }).catch(() => {
+      prompt('Copy this invite link:', url);
+    });
+  }
+
+  function copyRoomCode() {
+    if (!mpState.roomCode) return;
+    navigator.clipboard.writeText(mpState.roomCode).then(() => {
+      const btn = document.getElementById('mp-copy-code-btn');
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied Code! ✅';
+        setTimeout(() => (btn.textContent = orig), 2000);
+      }
+      playSound('click');
+    }).catch(() => {
+      prompt('Room Code:', mpState.roomCode);
+    });
+  }
+
+  function checkUrlRoomParam() {
+    const params = new URLSearchParams(window.location.search);
+    const roomParam = params.get('room');
+    if (roomParam) {
+      const joinCodeInput = document.getElementById('mp-join-code-input');
+      if (joinCodeInput) joinCodeInput.value = roomParam.trim().toUpperCase();
+
+      openMultiplayerModal();
+      showMpTab('mp-join-panel');
+    }
+  }
+
   // --- 16. EVENT LISTENERS & BOOTSTRAP ---
   function setupEventListeners() {
     document.getElementById('summon-card-btn')?.addEventListener('click', drawRandomCard);
+    document.getElementById('interactive-deck')?.addEventListener('click', drawRandomCard);
     document.getElementById('quick-random-btn')?.addEventListener('click', drawRandomCard);
 
     document.getElementById('reset-game-btn')?.addEventListener('click', () => {
       if (confirm('Start a fresh match? Squads and drafted cards will reset.')) {
-        initGame(state.players.length);
+        if (mpState.isOnline && mpState.isHost) {
+          launchOnlineMatch();
+        } else {
+          initGame(state.players.length);
+        }
         playSound('click');
       }
     });
@@ -1286,6 +1959,29 @@
       });
     });
 
+    // Multiplayer Modal & Lobby Controls
+    document.getElementById('open-multiplayer-btn')?.addEventListener('click', openMultiplayerModal);
+    document.getElementById('mp-show-create-btn')?.addEventListener('click', () => showMpTab('mp-create-panel'));
+    document.getElementById('mp-show-join-btn')?.addEventListener('click', () => showMpTab('mp-join-panel'));
+    document.getElementById('mp-back-to-main-btn1')?.addEventListener('click', () => showMpTab('mp-main-panel'));
+    document.getElementById('mp-back-to-main-btn2')?.addEventListener('click', () => showMpTab('mp-main-panel'));
+    document.getElementById('mp-confirm-create-btn')?.addEventListener('click', createOnlineRoom);
+    document.getElementById('mp-confirm-join-btn')?.addEventListener('click', () => {
+      const code = document.getElementById('mp-join-code-input')?.value;
+      const name = document.getElementById('mp-join-name-input')?.value;
+      joinOnlineRoom(code, name);
+    });
+    document.getElementById('mp-lobby-start-btn')?.addEventListener('click', launchOnlineMatch);
+    document.getElementById('mp-lobby-leave-btn')?.addEventListener('click', () => leaveOnlineRoom(true));
+    document.getElementById('leave-room-btn')?.addEventListener('click', () => {
+      if (confirm('Are you sure you want to leave the online room?')) {
+        leaveOnlineRoom(true);
+      }
+    });
+    document.getElementById('mp-copy-code-btn')?.addEventListener('click', copyRoomCode);
+    document.getElementById('mp-copy-link-btn')?.addEventListener('click', copyRoomLink);
+    document.getElementById('active-room-copy-btn')?.addEventListener('click', copyRoomLink);
+
     // Modals
     document.getElementById('open-battle-btn')?.addEventListener('click', initBattleArena);
     document.getElementById('open-archive-btn')?.addEventListener('click', openArchiveModal);
@@ -1308,7 +2004,11 @@
     });
     document.getElementById('restart-victory-btn')?.addEventListener('click', () => {
       document.getElementById('victory-modal')?.close();
-      initGame(state.players.length);
+      if (mpState.isOnline && mpState.isHost) {
+        launchOnlineMatch();
+      } else {
+        initGame(state.players.length);
+      }
     });
 
     // Roster Editor
@@ -1364,10 +2064,28 @@
     });
   }
 
+  function initDeckParallax() {
+    const deck = document.getElementById('interactive-deck');
+    if (!deck) return;
+    deck.addEventListener('mousemove', (e) => {
+      const rect = deck.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      const rotateX = (-y / rect.height) * 22;
+      const rotateY = (x / rect.width) * 22;
+      deck.style.transform = `translateY(-12px) scale(1.08) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+    });
+    deck.addEventListener('mouseleave', () => {
+      deck.style.transform = '';
+    });
+  }
+
   // --- BOOTSTRAP ---
   window.addEventListener('DOMContentLoaded', () => {
     initParticleCanvas();
     setupEventListeners();
+    initDeckParallax();
     initGame(2);
+    checkUrlRoomParam();
   });
 })();
