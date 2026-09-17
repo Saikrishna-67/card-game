@@ -457,10 +457,10 @@
           <div>
             <label style="font-size: 0.78rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">Starting Treasury Budget:</label>
             <select id="setup-offline-starting-budget" style="width: 100%; padding: 0.4rem 0.6rem; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); border-radius: 6px; color: #fff; font-family: var(--font-sans);">
-              <option value="50000000">$50,000,000</option>
-              <option value="100000000" selected>$100,000,000</option>
-              <option value="200000000">$200,000,000</option>
-              <option value="500000000">$500,000,000</option>
+              <option value="50000">₹50,000</option>
+              <option value="100000">₹1,00,000 (1 Lakh)</option>
+              <option value="150000">₹1,50,000 (1.5 Lakhs)</option>
+              <option value="200000" selected>₹2,00,000 (2 Lakhs - Max)</option>
             </select>
           </div>
           <div>
@@ -668,10 +668,10 @@
             <div>
               <label style="font-size: 0.75rem; color: var(--text-muted);">💰 Starting Budget:</label>
               <select id="mp-create-starting-budget" class="roster-filter-select" style="width: 100%; font-size: 0.82rem; padding: 0.35rem 0.5rem;">
-                <option value="50000000">$50,000,000</option>
-                <option value="100000000" selected>$100,000,000 (Standard)</option>
-                <option value="200000000">$200,000,000</option>
-                <option value="500000000">$500,000,000</option>
+                <option value="50000">₹50,000</option>
+                <option value="100000">₹1,00,000 (1 Lakh)</option>
+                <option value="150000">₹1,50,000 (1.5 Lakhs)</option>
+                <option value="200000" selected>₹2,00,000 (2 Lakhs - Max)</option>
               </select>
             </div>
             <div>
@@ -724,7 +724,7 @@
         <div class="lobby-settings-box" id="mp-lobby-settings-card" style="background: rgba(0, 210, 255, 0.05); border: 1px solid rgba(0, 210, 255, 0.25); border-radius: 8px; padding: 0.8rem; margin: 0.8rem 0;">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
             <strong style="font-size: 0.85rem; color: var(--neon-blue);">⚙️ Match Mode & Settings:</strong>
-            <span id="mp-lobby-mode-badge" class="mode-badge">🔥 AUCTION ON ($100M)</span>
+            <span id="mp-lobby-mode-badge" class="mode-badge">🔥 AUCTION ON (₹2,00,000)</span>
           </div>
 
           <!-- Host Edit Controls (Enabled only for Host) -->
@@ -739,10 +739,10 @@
             <div>
               <label style="font-size: 0.72rem; color: var(--text-muted);">Starting Budget:</label>
               <select id="mp-lobby-budget-select" class="roster-filter-select" style="width: 100%; font-size: 0.78rem; padding: 0.25rem 0.4rem;">
-                <option value="50000000">$50M</option>
-                <option value="100000000" selected>$100M</option>
-                <option value="200000000">$200M</option>
-                <option value="500000000">$500M</option>
+                <option value="50000">₹50k</option>
+                <option value="100000">₹1 Lakh</option>
+                <option value="150000">₹1.5 Lakhs</option>
+                <option value="200000" selected>₹2 Lakhs</option>
               </select>
             </div>
             <div>
@@ -790,25 +790,49 @@
         </div>
         <div class="auction-budget-tag" id="auction-my-budget-pill">
           <span>My Budget:</span>
-          <strong id="auction-my-budget-val" style="color: #06d6a0;">$100,000,000</strong>
+          <strong id="auction-my-budget-val" style="color: #06d6a0;">₹2,00,000</strong>
         </div>
       </div>
 
-      <!-- Main Auction Stage Layout (Card Hologram + Bidding Dashboard) -->
+      <!-- Main Auction Stage Layout (Character Info Hologram + Bidding Dashboard) -->
       <div class="auction-stage-grid">
-        <!-- Left: 3D Holographic Card Preview -->
+        <!-- Left: 3D Holographic Card Preview with Character Info, Best Fit & Stats -->
         <div class="auction-card-preview">
-          <div class="hologram-card" style="width: 250px; height: 350px;">
-            <div class="hologram-card-inner" style="padding: 1rem;">
-              <div id="auction-rank-banner" class="reveal-rank-banner tier-sss">SSS — GOD TIER</div>
-              <div class="reveal-avatar-frame" style="width: 100px; height: 100px; margin: 0.6rem auto;">
-                <img id="auction-avatar-img" class="reveal-avatar-img" src="" alt="Card" style="display:none;" onerror="this.style.display='none'; document.getElementById('auction-avatar-symbol').style.display='inline-block';">
-                <span id="auction-avatar-symbol" style="font-size: 2.6rem;">👑</span>
+          <div class="auction-char-detail-card">
+            <!-- Hologram Card -->
+            <div class="hologram-card" style="width: 260px; height: 310px; margin: 0 auto;">
+              <div class="hologram-card-inner" style="padding: 0.8rem;">
+                <div id="auction-rank-banner" class="reveal-rank-banner tier-sss">SSS — GOD TIER</div>
+                <div class="reveal-avatar-frame" style="width: 85px; height: 85px; margin: 0.4rem auto;">
+                  <img id="auction-avatar-img" class="reveal-avatar-img" src="" alt="Card" style="display:none;" onerror="this.style.display='none'; document.getElementById('auction-avatar-symbol').style.display='inline-block';">
+                  <span id="auction-avatar-symbol" style="font-size: 2.3rem;">👑</span>
+                </div>
+                <h3 id="auction-card-name" style="font-family: var(--font-serif); font-size: 1.12rem; color: #fff; margin-bottom: 0.15rem;">Sung Jinwoo</h3>
+                <div id="auction-card-title" style="font-size: 0.76rem; color: var(--neon-blue); margin-bottom: 0.25rem;">Shadow Monarch</div>
+                <div id="auction-card-power" style="font-size: 0.92rem; font-weight: 900; color: var(--gold);">⚡ 10,000,000 PWR</div>
               </div>
-              <h3 id="auction-card-name" style="font-family: var(--font-serif); font-size: 1.15rem; color: #fff; margin-bottom: 0.2rem;">Sung Jinwoo</h3>
-              <div id="auction-card-title" style="font-size: 0.78rem; color: var(--neon-blue); margin-bottom: 0.4rem;">Shadow Monarch</div>
-              <div id="auction-card-power" style="font-size: 0.95rem; font-weight: 900; color: var(--gold);">⚡ 10,000,000 PWR</div>
-              <div id="auction-card-roles" style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.4rem;">Leader, Fighter, Assassin</div>
+            </div>
+
+            <!-- Glowing Best Fit / Recommended Roles Container -->
+            <div class="auction-best-fit-container" id="auction-best-fit-container">
+              <div class="auction-best-fit-title">⭐ RECOMMENDED / BEST FIT ROLES:</div>
+              <div class="auction-best-fit-tags" id="auction-best-fit-tags">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- 6 Stat Meters Grid -->
+            <div class="auction-stats-grid" id="auction-stats-grid">
+              <!-- Dynamically populated -->
+            </div>
+
+            <!-- Abilities & Feats / Quote Info Box -->
+            <div class="auction-lore-box">
+              <div class="auction-lore-label">🔮 Unique Abilities:</div>
+              <div id="auction-card-abilities" class="auction-lore-text">Shadow Extraction & Monarch's Domain</div>
+              <div class="auction-lore-label" style="margin-top: 0.35rem;">🏆 Canon Feats:</div>
+              <div id="auction-card-feats" class="auction-lore-text">Defeated Antares, extracted millions of shadows.</div>
+              <div id="auction-card-quote" class="auction-quote-text">"Arise."</div>
             </div>
           </div>
         </div>
@@ -829,7 +853,7 @@
           <!-- Current Highest Bid Display -->
           <div class="current-bid-box" id="current-bid-box">
             <div style="font-size: 0.78rem; color: var(--text-muted); letter-spacing: 1px; text-transform: uppercase;">Current Leading Bid</div>
-            <div class="current-bid-number" id="auction-current-bid-num">💰 $1,000,000</div>
+            <div class="current-bid-number" id="auction-current-bid-num">💰 ₹5,000</div>
             <div class="current-bidder-row">
               <span>Leading Bidder:</span>
               <strong id="auction-highest-bidder-name" style="color: var(--neon-blue);">None (Starting Price)</strong>
@@ -853,15 +877,15 @@
               👉 QUICK BID INCREMENTS:
             </div>
             <div class="quick-bid-grid">
-              <button type="button" class="btn-quick-bid" data-inc="1000000">+$1M 💰</button>
-              <button type="button" class="btn-quick-bid" data-inc="5000000">+$5M 💰</button>
-              <button type="button" class="btn-quick-bid" data-inc="10000000">+$10M ⚡</button>
-              <button type="button" class="btn-quick-bid" data-inc="25000000">+$25M 🔥</button>
+              <button type="button" class="btn-quick-bid" data-inc="2000">+₹2k 💰</button>
+              <button type="button" class="btn-quick-bid" data-inc="5000">+₹5k 💰</button>
+              <button type="button" class="btn-quick-bid" data-inc="10000">+₹10k ⚡</button>
+              <button type="button" class="btn-quick-bid" data-inc="25000">+₹25k 🔥</button>
             </div>
 
             <!-- Custom Bid Input Row -->
             <div class="custom-bid-row" style="margin-top: 0.6rem; display: flex; gap: 0.5rem;">
-              <input type="number" id="auction-custom-bid-input" placeholder="Custom Bid (e.g. 15000000)" step="1000000" min="1000000" style="flex:1; padding:0.5rem 0.8rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); border-radius:6px; color:#fff; font-family:var(--font-sans);">
+              <input type="number" id="auction-custom-bid-input" placeholder="Custom Bid (e.g. 25000)" step="1000" min="1000" max="200000" style="flex:1; padding:0.5rem 0.8rem; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.2); border-radius:6px; color:#fff; font-family:var(--font-sans);">
               <button type="button" id="auction-place-custom-bid-btn" class="btn-primary" style="padding:0.5rem 1rem; font-size:0.85rem;">Bid 🚀</button>
             </div>
 
@@ -892,14 +916,17 @@
       <div id="auction-winner-slotting-panel" class="auction-winner-slotting-panel" style="display: none; margin-top: 1.2rem; background: rgba(0, 210, 255, 0.08); border: 2px solid var(--gold); border-radius: 10px; padding: 1rem;">
         <div style="text-align: center; margin-bottom: 0.8rem;">
           <h3 style="font-family: var(--font-serif); color: var(--gold); font-size: 1.25rem;">
-            🏆 CARD SOLD TO <span id="auction-final-winner-name">PLAYER</span> FOR <span id="auction-final-sold-price">$10,000,000</span>!
+            🏆 CARD SOLD TO <span id="auction-final-winner-name">PLAYER</span> FOR <span id="auction-final-sold-price">₹10,000</span>!
           </h3>
+          <div id="auction-winner-best-fit-banner" class="auction-winner-best-fit-banner" style="margin: 0.5rem 0;">
+            <!-- Best Fit highlights rendered here -->
+          </div>
           <p id="auction-slot-instruction" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 0.2rem;">
             Select which open squad position to permanently assign this card to:
           </p>
         </div>
         <div class="reveal-role-buttons" id="auction-winner-role-buttons">
-          <!-- Dynamically populated with open squad slots -->
+          <!-- Dynamically populated with open squad slots and highlighted best fit chips -->
         </div>
       </div>
     </div>

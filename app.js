@@ -159,6 +159,11 @@
     '#9d4edd', '#f97316', '#ec4899', '#14b8a6'
   ];
 
+  function formatINR(val) {
+    if (val === undefined || val === null || isNaN(val)) return '₹0';
+    return '₹' + Number(val).toLocaleString('en-IN');
+  }
+
   // --- 2. GLOBAL APP STATE ---
   const state = {
     universe: (typeof window.getActiveUniverse === 'function' ? window.getActiveUniverse() : 'sololeveling'),
@@ -173,7 +178,7 @@
     bgmEnabled: false,
     theme: 'shadow',
     isAuctionMode: false,
-    startingBudget: 100000000,
+    startingBudget: 200000,
     bidTimerDuration: 15,
     offlineActiveBidderIndex: 0,
     offlineTimerInterval: null,
@@ -202,9 +207,9 @@
     roomData: null,
     listenerAttached: false,
     isAuctionMode: false,
-    startingBudget: 100000000,
+    startingBudget: 200000,
     bidTimerDuration: 15,
-    myBudget: 100000000,
+    myBudget: 200000,
     auctionLocalTimerInterval: null,
     myFolded: false
   };
@@ -1119,7 +1124,7 @@
 
     state.players = [];
     const defaultNames = uniConfig.defaultPlayerNames;
-    const startingBudget = state.startingBudget || 100000000;
+    const startingBudget = state.startingBudget || 200000;
     for (let i = 0; i < playerCount; i++) {
       const pName =
         (customNames && customNames[i]) ||
@@ -1181,7 +1186,7 @@
     }
 
     if (state.isAuctionMode) {
-      const budget = state.startingBudget || 100000000;
+      const budget = state.startingBudget || 200000;
       state.players.forEach((p) => {
         if (p.budget === undefined || p.budget === 0) {
           p.budget = budget;
@@ -1273,12 +1278,12 @@
       const activeSynergies = evaluateSquadSynergies(player);
 
       const playerBudget = mpState.isOnline
-        ? (mpState.roomData?.budgets?.[player.id] !== undefined ? mpState.roomData.budgets[player.id] : (mpState.startingBudget || 100000000))
-        : (player.budget !== undefined ? player.budget : (state.startingBudget || 100000000));
+        ? (mpState.roomData?.budgets?.[player.id] !== undefined ? mpState.roomData.budgets[player.id] : (mpState.startingBudget || 200000))
+        : (player.budget !== undefined ? player.budget : (state.startingBudget || 200000));
 
       const isAuctionActive = (mpState.isOnline && mpState.isAuctionMode) || (!mpState.isOnline && state.isAuctionMode);
       const budgetHTML = isAuctionActive
-        ? `<span class="budget-pill" title="Remaining Treasury Budget">💰 $${playerBudget.toLocaleString()}</span>`
+        ? `<span class="budget-pill" title="Remaining Treasury Budget">💰 ${formatINR(playerBudget)}</span>`
         : '';
 
       const pCard = document.createElement('div');
@@ -1425,7 +1430,7 @@
     if (mpState.isOnline && mpState.roomRef) {
       if (mpState.isAuctionMode) {
         const duration = mpState.bidTimerDuration || 15;
-        const startingBid = 1000000;
+        const startingBid = 5000;
         setTimeout(() => {
           mpState.roomRef.update({
             currentAuction: {
@@ -1438,7 +1443,7 @@
               highestBidderColor: '#ffd166',
               expiresAt: Date.now() + duration * 1000,
               duration: duration,
-              feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at $${startingBid.toLocaleString()}!`]
+              feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at ${formatINR(startingBid)}!`]
             }
           });
         }, 350);
@@ -1463,7 +1468,7 @@
         );
         state.offlineActiveBidderIndex = firstEligibleIdx >= 0 ? firstEligibleIdx : 0;
         const duration = state.bidTimerDuration !== undefined ? state.bidTimerDuration : 15;
-        const startingBid = 1000000;
+        const startingBid = 5000;
         state.currentAuction = {
           active: true,
           status: 'bidding',
@@ -1475,7 +1480,7 @@
           highestBidderIndex: null,
           expiresAt: duration > 0 ? (Date.now() + duration * 1000) : null,
           duration: duration,
-          feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at $${startingBid.toLocaleString()}!`]
+          feed: [`⚡ ${drawn.name} (${drawn.tier_category}) presented on auction block at ${formatINR(startingBid)}!`]
         };
         setTimeout(() => {
           syncOfflineAuctionModal();
@@ -2433,7 +2438,7 @@
 
     const setupToggle = document.getElementById('setup-offline-auction-toggle');
     const isAuction = setupToggle ? setupToggle.checked : state.isAuctionMode;
-    const budgetVal = parseInt(document.getElementById('setup-offline-starting-budget')?.value, 10) || 100000000;
+    const budgetVal = parseInt(document.getElementById('setup-offline-starting-budget')?.value, 10) || 200000;
     const timerVal = parseInt(document.getElementById('setup-offline-bid-timer')?.value, 10);
 
     state.isAuctionMode = isAuction;
@@ -2529,7 +2534,7 @@
     const hostUniverse = document.getElementById('mp-host-universe')?.value || state.universe || 'sololeveling';
     
     const isAuctionMode = document.getElementById('mp-create-auction-toggle')?.checked !== false;
-    const startingBudget = parseInt(document.getElementById('mp-create-starting-budget')?.value, 10) || 100000000;
+    const startingBudget = parseInt(document.getElementById('mp-create-starting-budget')?.value, 10) || 200000;
     const bidTimerDuration = parseInt(document.getElementById('mp-create-bid-timer')?.value, 10) || 15;
 
     state.universe = hostUniverse;
@@ -2651,7 +2656,7 @@
         });
 
         const budgets = room.budgets || {};
-        budgets[localId] = room.startingBudget || 100000000;
+        budgets[localId] = room.startingBudget || 200000;
 
         roomRef.update({
           players: players,
@@ -2707,7 +2712,7 @@
     const isLocalHost = (data.hostId === localId);
     mpState.isHost = isLocalHost;
     mpState.isAuctionMode = !!data.isAuctionMode;
-    mpState.startingBudget = data.startingBudget || 100000000;
+    mpState.startingBudget = data.startingBudget || 200000;
     mpState.bidTimerDuration = data.bidTimerDuration || 15;
 
     // Sync Universe / Edition across all joined peers
@@ -2732,7 +2737,7 @@
       const modeBadge = document.getElementById('mp-lobby-mode-badge');
       if (modeBadge) {
         if (data.isAuctionMode) {
-          modeBadge.textContent = `🔥 AUCTION ON ($${((data.startingBudget || 100000000) / 1000000).toFixed(0)}M)`;
+          modeBadge.textContent = `🔥 AUCTION ON (${formatINR(data.startingBudget || 200000)})`;
           modeBadge.style.display = 'inline-block';
         } else {
           modeBadge.textContent = '⚡ TURN DRAFT MODE';
@@ -2748,7 +2753,7 @@
           const auctionToggle = document.getElementById('mp-lobby-auction-toggle');
           if (auctionToggle) auctionToggle.value = data.isAuctionMode ? 'true' : 'false';
           const budgetSelect = document.getElementById('mp-lobby-budget-select');
-          if (budgetSelect) budgetSelect.value = data.startingBudget || 100000000;
+          if (budgetSelect) budgetSelect.value = data.startingBudget || 200000;
           const uniSelect = document.getElementById('mp-lobby-universe-select');
           if (uniSelect) uniSelect.value = data.universe || 'sololeveling';
         } else {
@@ -2812,8 +2817,8 @@
           activeBudgetPill.style.display = 'inline-block';
           const myBal = (data.budgets && data.budgets[localId] !== undefined)
             ? data.budgets[localId]
-            : (data.startingBudget || 100000000);
-          activeBudgetPill.textContent = `💰 $${myBal.toLocaleString()}`;
+            : (data.startingBudget || 200000);
+          activeBudgetPill.textContent = `💰 ${formatINR(myBal)}`;
         }
       } else {
         if (activeModeBadge) activeModeBadge.style.display = 'none';
@@ -2868,35 +2873,18 @@
   }
 
   // --- 15.6 LIVE AUCTION / BIDDING SYSTEM ENGINE ---
-  function syncAuctionModal(auctionData, budgets) {
-    const modal = document.getElementById('auction-modal');
-    if (!modal) return;
+  function populateAuctionCardPreview(char) {
+    if (!char) return;
 
-    if (!auctionData || !auctionData.active) {
-      if (mpState.auctionLocalTimerInterval) {
-        clearInterval(mpState.auctionLocalTimerInterval);
-        mpState.auctionLocalTimerInterval = null;
-      }
-      if (modal.open) modal.close();
-      return;
-    }
+    // Basic Header
+    const nameEl = document.getElementById('auction-card-name');
+    if (nameEl) nameEl.textContent = char.name;
 
-    if (!modal.open) modal.showModal();
+    const titleEl = document.getElementById('auction-card-title');
+    if (titleEl) titleEl.textContent = char.title || char.role || 'Hunter';
 
-    const char = auctionData.char;
-    const localId = getOrSetLocalPlayerId();
-
-    // Hide offline bidder section in online mode
-    const offlineSection = document.getElementById('auction-offline-bidder-section');
-    if (offlineSection) offlineSection.style.display = 'none';
-    const budgetPillLabel = document.querySelector('#auction-my-budget-pill span');
-    if (budgetPillLabel) budgetPillLabel.textContent = 'My Budget:';
-
-    // Populate Holographic Card Preview
-    document.getElementById('auction-card-name').textContent = char.name;
-    document.getElementById('auction-card-title').textContent = char.title || char.role || 'Hunter';
-    document.getElementById('auction-card-power').textContent = `⚡ ${(char.power_number || 100000).toLocaleString()} PWR`;
-    document.getElementById('auction-card-roles').textContent = `Eligible: ${(char.eligible_roles || []).join(', ')}`;
+    const powerEl = document.getElementById('auction-card-power');
+    if (powerEl) powerEl.textContent = `⚡ ${(char.power_number || 100000).toLocaleString()} PWR`;
 
     const rankBanner = document.getElementById('auction-rank-banner');
     if (rankBanner) {
@@ -2921,9 +2909,145 @@
       symbolEl.style.display = 'block';
     }
 
+    // Best Fit / Recommended Roles Tags
+    const bestFitTagsContainer = document.getElementById('auction-best-fit-tags');
+    if (bestFitTagsContainer) {
+      bestFitTagsContainer.innerHTML = '';
+      const currentRoles = getRoles();
+      const eligible = char.eligible_roles || [];
+      if (eligible.length === 0) {
+        bestFitTagsContainer.innerHTML = `<span style="font-size:0.75rem; color:var(--text-muted);">All Squad Positions (+15% PWR)</span>`;
+      } else {
+        eligible.forEach((rKey) => {
+          const roleMeta = currentRoles.find((r) => r.key === rKey) || { icon: '⭐', name: rKey };
+          const chip = document.createElement('span');
+          chip.className = 'best-fit-tag-chip';
+          chip.innerHTML = `${roleMeta.icon} ${roleMeta.name} <strong style="color:#06d6a0;">+15%</strong>`;
+          bestFitTagsContainer.appendChild(chip);
+        });
+      }
+    }
+
+    // 6 Stat Meters
+    const statsGrid = document.getElementById('auction-stats-grid');
+    if (statsGrid) {
+      const stats = char.stats || {
+        raw_power: 8.5,
+        hax: 8.0,
+        speed: 8.5,
+        durability: 8.0,
+        synergy: 8.5,
+        battle_iq: 8.5
+      };
+      const statConfigs = [
+        { label: '💥 Power', val: stats.raw_power },
+        { label: '🔮 Hax', val: stats.hax },
+        { label: '⚡ Speed', val: stats.speed },
+        { label: '🛡️ Armor', val: stats.durability },
+        { label: '🤝 Synergy', val: stats.synergy },
+        { label: '🧠 IQ', val: stats.battle_iq }
+      ];
+      statsGrid.innerHTML = statConfigs.map(s => `
+        <div class="auction-stat-pill">
+          <div class="auction-stat-pill-header">
+            <span>${s.label}</span>
+            <strong style="color:var(--gold); font-size:0.7rem;">${(s.val || 8).toFixed(1)}</strong>
+          </div>
+          <div class="auction-stat-bar-track">
+            <div class="auction-stat-bar-fill" style="width: ${Math.min(100, ((s.val || 8) / 10) * 100)}%;"></div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // Abilities, Feats, and Quote
+    const abilitiesEl = document.getElementById('auction-card-abilities');
+    if (abilitiesEl) {
+      const abs = Array.isArray(char.abilities) ? char.abilities.join(' • ') : (char.abilities || char.best_function || 'Master combat technique.');
+      abilitiesEl.textContent = abs;
+    }
+
+    const featsEl = document.getElementById('auction-card-feats');
+    if (featsEl) {
+      featsEl.textContent = char.feats || char.description || 'Legendary feats achieved across dimensional wars.';
+    }
+
+    const quoteEl = document.getElementById('auction-card-quote');
+    if (quoteEl) {
+      quoteEl.textContent = char.quote ? `"${char.quote}"` : `"${char.name}"`;
+    }
+  }
+
+  function renderAuctionWinnerRoleButtons(char, winningSquad, onSelectRole) {
+    const roleBtns = document.getElementById('auction-winner-role-buttons');
+    if (!roleBtns) return;
+    roleBtns.innerHTML = '';
+
+    const bestFitBanner = document.getElementById('auction-winner-best-fit-banner');
+    const currentRoles = getRoles();
+    const eligibleKeys = char.eligible_roles || [];
+
+    if (bestFitBanner) {
+      const bestFitNames = eligibleKeys.map(k => {
+        const r = currentRoles.find(cr => cr.key === k);
+        return r ? `${r.icon} ${r.name}` : k;
+      });
+      bestFitBanner.innerHTML = `⭐ <strong>RECOMMENDED BEST FIT (+15% PWR BOOST):</strong> ${bestFitNames.length ? bestFitNames.join(', ') : 'All Positions'}`;
+    }
+
+    currentRoles.forEach((r) => {
+      const isFilled = !!winningSquad[r.key];
+      const isEligible = eligibleKeys.includes(r.key);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `btn-assign-role ${isEligible ? 'recommended' : ''}`;
+
+      if (isFilled) {
+        btn.disabled = true;
+        btn.style.opacity = '0.35';
+        btn.style.cursor = 'not-allowed';
+        btn.innerHTML = `${r.icon} ${r.name} 🔒 (Filled)`;
+      } else {
+        btn.innerHTML = `${r.icon} ${r.name} ${isEligible ? '⭐ (Best Fit: +15% Boost)' : ''}`;
+        btn.addEventListener('click', () => {
+          onSelectRole(r.key);
+        });
+      }
+      roleBtns.appendChild(btn);
+    });
+  }
+
+  function syncAuctionModal(auctionData, budgets) {
+    const modal = document.getElementById('auction-modal');
+    if (!modal) return;
+
+    if (!auctionData || !auctionData.active) {
+      if (mpState.auctionLocalTimerInterval) {
+        clearInterval(mpState.auctionLocalTimerInterval);
+        mpState.auctionLocalTimerInterval = null;
+      }
+      if (modal.open) modal.close();
+      return;
+    }
+
+    if (!modal.open) modal.showModal();
+
+    const char = auctionData.char;
+    const localId = getOrSetLocalPlayerId();
+
+    // Hide offline bidder section in online mode
+    const offlineSection = document.getElementById('auction-offline-bidder-section');
+    if (offlineSection) offlineSection.style.display = 'none';
+    const budgetPillLabel = document.querySelector('#auction-my-budget-pill span');
+    if (budgetPillLabel) budgetPillLabel.textContent = 'My Budget:';
+
+    // Populate Detailed Holographic Card Preview with Best Fit & Stats
+    populateAuctionCardPreview(char);
+
     // Populate Current Leading Bid
     const bidNumEl = document.getElementById('auction-current-bid-num');
-    if (bidNumEl) bidNumEl.textContent = `💰 $${(auctionData.currentBid || 1000000).toLocaleString()}`;
+    if (bidNumEl) bidNumEl.textContent = `💰 ${formatINR(auctionData.currentBid || 5000)}`;
 
     const bidderNameEl = document.getElementById('auction-highest-bidder-name');
     if (bidderNameEl) {
@@ -2934,9 +3058,9 @@
     // Populate My Remaining Budget
     const myBudgetVal = (budgets && budgets[localId] !== undefined)
       ? budgets[localId]
-      : (mpState.startingBudget || 100000000);
+      : (mpState.startingBudget || 200000);
     const myBudgetElement = document.getElementById('auction-my-budget-val');
-    if (myBudgetElement) myBudgetElement.textContent = `$${myBudgetVal.toLocaleString()}`;
+    if (myBudgetElement) myBudgetElement.textContent = formatINR(myBudgetVal);
 
     // Live Countdown Timer
     if (mpState.auctionLocalTimerInterval) {
@@ -2998,41 +3122,20 @@
       if (winnerSlotPanel) {
         winnerSlotPanel.style.display = 'block';
         document.getElementById('auction-final-winner-name').textContent = auctionData.highestBidderName;
-        document.getElementById('auction-final-sold-price').textContent = `$${auctionData.currentBid.toLocaleString()}`;
-
-        const roleBtns = document.getElementById('auction-winner-role-buttons');
-        roleBtns.innerHTML = '';
+        document.getElementById('auction-final-sold-price').textContent = formatINR(auctionData.currentBid);
 
         if (localId === auctionData.highestBidderId) {
           document.getElementById('auction-slot-instruction').innerHTML = '🎉 <strong>You won this card!</strong> Select which open squad position to permanently lock it into:';
 
           const myPlayer = state.players.find(p => p.id === localId) || { squad: {} };
           const mySquad = myPlayer.squad || {};
-          const currentRoles = getRoles();
-
-          currentRoles.forEach((r) => {
-            const isFilled = !!mySquad[r.key];
-            const isEligible = char.eligible_roles && char.eligible_roles.includes(r.key);
-
-            const btn = document.createElement('button');
-            btn.type = 'button';
-            btn.className = `btn-assign-role ${isEligible ? 'recommended' : ''}`;
-
-            if (isFilled) {
-              btn.disabled = true;
-              btn.style.opacity = '0.35';
-              btn.style.cursor = 'not-allowed';
-              btn.innerHTML = `${r.icon} ${r.name} 🔒 (Filled)`;
-            } else {
-              btn.innerHTML = `${r.icon} ${r.name} ${isEligible ? '⭐ (Best Fit)' : ''}`;
-              btn.addEventListener('click', () => {
-                assignAuctionWonCard(r.key);
-              });
-            }
-            roleBtns.appendChild(btn);
+          renderAuctionWinnerRoleButtons(char, mySquad, (roleKey) => {
+            assignAuctionWonCard(roleKey);
           });
         } else {
           document.getElementById('auction-slot-instruction').innerHTML = `⏳ Waiting for <strong style="color:${auctionData.highestBidderColor};">${auctionData.highestBidderName}</strong> to assign this card to their squad...`;
+          const roleBtns = document.getElementById('auction-winner-role-buttons');
+          if (roleBtns) roleBtns.innerHTML = '';
         }
       }
     } else {
@@ -3053,7 +3156,7 @@
     const localId = getOrSetLocalPlayerId();
     const myBudget = (mpState.roomData.budgets && mpState.roomData.budgets[localId] !== undefined)
       ? mpState.roomData.budgets[localId]
-      : (mpState.startingBudget || 100000000);
+      : (mpState.startingBudget || 200000);
 
     let newBid = 0;
     if (isCustom) {
@@ -3064,12 +3167,12 @@
     }
 
     if (newBid <= auctionData.currentBid) {
-      alert(`Your bid must be higher than the current leading bid ($${auctionData.currentBid.toLocaleString()})!`);
+      alert(`Your bid must be higher than the current leading bid (${formatINR(auctionData.currentBid)})!`);
       return;
     }
 
     if (newBid > myBudget) {
-      alert(`Insufficient treasury funds! You have $${myBudget.toLocaleString()} remaining.`);
+      alert(`Insufficient treasury funds! You have ${formatINR(myBudget)} remaining.`);
       return;
     }
 
@@ -3080,7 +3183,7 @@
 
     // Anti-snipe: extend expiration by 5 seconds if bid arrives near the end
     const newExpiresAt = Math.max(auctionData.expiresAt, Date.now() + 5000);
-    const newFeed = [...(auctionData.feed || []), `💰 ${myPlayer.name} placed bid of $${newBid.toLocaleString()}!`].slice(-10);
+    const newFeed = [...(auctionData.feed || []), `💰 ${myPlayer.name} placed bid of ${formatINR(newBid)}!`].slice(-10);
 
     playSound('bid_placed');
 
@@ -3103,7 +3206,7 @@
     // Case 1: High Bidder Wins Card
     if (auctionData.highestBidderId && !manualPass) {
       playSound('gavel_sold');
-      const newFeed = [...(auctionData.feed || []), `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for $${auctionData.currentBid.toLocaleString()}!`];
+      const newFeed = [...(auctionData.feed || []), `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for ${formatINR(auctionData.currentBid)}!`];
 
       mpState.roomRef.child('currentAuction').update({
         status: 'sold',
@@ -3194,38 +3297,12 @@
 
     const char = auctionData.char;
 
-    // Populate Holographic Card Preview
-    document.getElementById('auction-card-name').textContent = char.name;
-    document.getElementById('auction-card-title').textContent = char.title || char.role || 'Hunter';
-    document.getElementById('auction-card-power').textContent = `⚡ ${(char.power_number || 100000).toLocaleString()} PWR`;
-    document.getElementById('auction-card-roles').textContent = `Eligible: ${(char.eligible_roles || []).join(', ')}`;
-
-    const rankBanner = document.getElementById('auction-rank-banner');
-    if (rankBanner) {
-      rankBanner.textContent = char.tier || `${char.tier_category} — TIER`;
-      rankBanner.className = `reveal-rank-banner tier-${(char.tier_category || 'A').toLowerCase().replace('+', 'plus')}`;
-    }
-
-    const avatarImg = document.getElementById('auction-avatar-img');
-    const symbolEl = document.getElementById('auction-avatar-symbol');
-    if (avatarImg) {
-      if (char.image) {
-        avatarImg.src = char.image;
-        avatarImg.style.display = 'block';
-        if (symbolEl) symbolEl.style.display = 'none';
-      } else {
-        avatarImg.style.display = 'none';
-        if (symbolEl) symbolEl.style.display = 'block';
-      }
-    }
-    if (symbolEl && !char.image) {
-      symbolEl.textContent = char.symbol || '⚔️';
-      symbolEl.style.display = 'block';
-    }
+    // Populate Detailed Holographic Card Preview with Best Fit & Stats
+    populateAuctionCardPreview(char);
 
     // Populate Current Leading Bid
     const bidNumEl = document.getElementById('auction-current-bid-num');
-    if (bidNumEl) bidNumEl.textContent = `💰 $${(auctionData.currentBid || 1000000).toLocaleString()}`;
+    if (bidNumEl) bidNumEl.textContent = `💰 ${formatINR(auctionData.currentBid || 5000)}`;
 
     const bidderNameEl = document.getElementById('auction-highest-bidder-name');
     if (bidderNameEl) {
@@ -3257,7 +3334,7 @@
 
         tab.innerHTML = `
           <span style="color:${p.color}; font-weight:800;">${p.name.split(' ')[0]}</span>
-          <span style="color:#06d6a0;">$${(p.budget || 0).toLocaleString()}</span>
+          <span style="color:#06d6a0;">${formatINR(p.budget || 0)}</span>
           ${statusBadge}
         `;
 
@@ -3272,7 +3349,7 @@
       });
     }
 
-    const currentBidder = state.players[state.offlineActiveBidderIndex] || state.players[0] || { name: 'Player', budget: 100000000 };
+    const currentBidder = state.players[state.offlineActiveBidderIndex] || state.players[0] || { name: 'Player', budget: 200000 };
     if (activeBidderIndicator) {
       activeBidderIndicator.textContent = `Selected: ${currentBidder.name}`;
       activeBidderIndicator.style.color = currentBidder.color || 'var(--neon-blue)';
@@ -3280,7 +3357,7 @@
 
     // Populate Active Selected Player's Remaining Budget in header
     const myBudgetElement = document.getElementById('auction-my-budget-val');
-    if (myBudgetElement) myBudgetElement.textContent = `$${(currentBidder.budget || 0).toLocaleString()}`;
+    if (myBudgetElement) myBudgetElement.textContent = formatINR(currentBidder.budget || 0);
     const budgetPillLabel = document.querySelector('#auction-my-budget-pill span');
     if (budgetPillLabel) budgetPillLabel.textContent = `${currentBidder.name.split(' ')[0]} Budget:`;
 
@@ -3355,37 +3432,14 @@
       if (winnerSlotPanel) {
         winnerSlotPanel.style.display = 'block';
         document.getElementById('auction-final-winner-name').textContent = auctionData.highestBidderName;
-        document.getElementById('auction-final-sold-price').textContent = `$${auctionData.currentBid.toLocaleString()}`;
-
-        const roleBtns = document.getElementById('auction-winner-role-buttons');
-        roleBtns.innerHTML = '';
+        document.getElementById('auction-final-sold-price').textContent = formatINR(auctionData.currentBid);
 
         const winningPlayer = state.players.find(p => p.id === auctionData.highestBidderId) || state.players[0];
-        document.getElementById('auction-slot-instruction').innerHTML = `🎉 <strong>${winningPlayer.name} won this card!</strong> Select which open squad position to permanently lock it into:`;
+        document.getElementById('auction-slot-instruction').innerHTML = `🎉 <strong>${winningPlayer.name} won this card!</strong> Select which squad position to permanently lock it into:`;
 
         const winningSquad = winningPlayer.squad || {};
-        const currentRoles = getRoles();
-
-        currentRoles.forEach((r) => {
-          const isFilled = !!winningSquad[r.key];
-          const isEligible = char.eligible_roles && char.eligible_roles.includes(r.key);
-
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = `btn-assign-role ${isEligible ? 'recommended' : ''}`;
-
-          if (isFilled) {
-            btn.disabled = true;
-            btn.style.opacity = '0.35';
-            btn.style.cursor = 'not-allowed';
-            btn.innerHTML = `${r.icon} ${r.name} 🔒 (Filled)`;
-          } else {
-            btn.innerHTML = `${r.icon} ${r.name} ${isEligible ? '⭐ (Best Fit)' : ''}`;
-            btn.addEventListener('click', () => {
-              assignOfflineAuctionWonCard(r.key);
-            });
-          }
-          roleBtns.appendChild(btn);
+        renderAuctionWinnerRoleButtons(char, winningSquad, (roleKey) => {
+          assignOfflineAuctionWonCard(roleKey);
         });
       }
     } else {
@@ -3423,12 +3477,12 @@
     }
 
     if (newBid <= auctionData.currentBid) {
-      alert(`Your bid must be higher than the current leading bid ($${auctionData.currentBid.toLocaleString()})!`);
+      alert(`Your bid must be higher than the current leading bid (${formatINR(auctionData.currentBid)})!`);
       return;
     }
 
     if (newBid > (currentBidder.budget || 0)) {
-      alert(`Insufficient treasury funds for ${currentBidder.name}! Remaining: $${(currentBidder.budget || 0).toLocaleString()}`);
+      alert(`Insufficient treasury funds for ${currentBidder.name}! Remaining: ${formatINR(currentBidder.budget || 0)}`);
       return;
     }
 
@@ -3442,7 +3496,7 @@
     auctionData.highestBidderName = currentBidder.name;
     auctionData.highestBidderColor = currentBidder.color || '#ffd166';
     auctionData.highestBidderIndex = state.offlineActiveBidderIndex;
-    auctionData.feed = [...(auctionData.feed || []), `💰 ${currentBidder.name} placed bid of $${newBid.toLocaleString()}!`].slice(-10);
+    auctionData.feed = [...(auctionData.feed || []), `💰 ${currentBidder.name} placed bid of ${formatINR(newBid)}!`].slice(-10);
 
     playSound('bid_placed');
 
@@ -3503,7 +3557,7 @@
     if (auctionData.highestBidderId && !manualPass) {
       playSound('gavel_sold');
       auctionData.status = 'sold';
-      auctionData.feed = [...(auctionData.feed || []), `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for $${auctionData.currentBid.toLocaleString()}!`];
+      auctionData.feed = [...(auctionData.feed || []), `🔨 GAVEL STRIKE: Sold to ${auctionData.highestBidderName} for ${formatINR(auctionData.currentBid)}!`];
       syncOfflineAuctionModal();
       return;
     }
@@ -3576,7 +3630,7 @@
       squad: {}
     }));
 
-    const startingBudget = mpState.roomData?.startingBudget || 100000000;
+    const startingBudget = mpState.roomData?.startingBudget || 200000;
     const initialBudgets = {};
     cleanPlayers.forEach((p) => {
       initialBudgets[p.id] = startingBudget;
@@ -3707,7 +3761,7 @@
     });
 
     document.getElementById('setup-offline-starting-budget')?.addEventListener('change', (e) => {
-      const budget = parseInt(e.target.value, 10) || 100000000;
+      const budget = parseInt(e.target.value, 10) || 200000;
       state.startingBudget = budget;
     });
 
@@ -3823,7 +3877,7 @@
     });
     document.getElementById('mp-lobby-budget-select')?.addEventListener('change', (e) => {
       if (mpState.isOnline && mpState.isHost && mpState.roomRef) {
-        const budget = parseInt(e.target.value, 10) || 100000000;
+        const budget = parseInt(e.target.value, 10) || 200000;
         mpState.roomRef.update({ startingBudget: budget });
         playSound('click');
       }
